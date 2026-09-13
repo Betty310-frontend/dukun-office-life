@@ -49,30 +49,37 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  /* 원본 프로토타입(원본_V31.html)의 "연분홍 미연시" 테마를 그대로 이식 */
+  --background: #fff7fa;
+  --foreground: #3d3037;
+  --card: #fffbfd;
+  --card-foreground: #3d3037;
+  --popover: #fffbfd;
+  --popover-foreground: #3d3037;
+  --primary: #e978a5;
+  --primary-foreground: #fff7fb;
+  --secondary: #fdebf3;
+  --secondary-foreground: #6b4a57;
+  --muted: #fdebf3;
+  --muted-foreground: #8b747f;
+  --accent: #fff0f7;
+  --accent-foreground: #6b3b52;
+  --destructive: #c74f6e;
+  --border: #f0dbe4;
+  --input: #f0dbe4;
+  --ring: #e978a5;
+  --ok: #7f9c72;
+  --cute-pink: #fff0f6;
+  --cute-yellow: #fff8ed;
+  --cute-mint: #f3faf7;
+  --cute-blue: #f6f5ff;
+  --cute-purple: #fff0f7;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.75rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -122,7 +129,35 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background-color: var(--background);
+    background-image:
+      radial-gradient(circle at 8% 8%, rgba(255, 213, 229, 0.55), transparent 23%),
+      radial-gradient(circle at 92% 10%, rgba(255, 232, 239, 0.5), transparent 22%),
+      radial-gradient(circle at 50% 100%, rgba(248, 217, 231, 0.35), transparent 30%);
+    background-attachment: fixed;
+    position: relative;
+  }
+  body::before {
+    content: "♡";
+    position: fixed;
+    left: 3.5vw;
+    top: 13vh;
+    font-size: 72px;
+    color: rgba(232, 120, 165, 0.055);
+    transform: rotate(-12deg);
+    pointer-events: none;
+    z-index: -1;
+  }
+  body::after {
+    content: "✦";
+    position: fixed;
+    right: 5vw;
+    bottom: 8vh;
+    font-size: 54px;
+    color: rgba(232, 120, 165, 0.07);
+    pointer-events: none;
+    z-index: -1;
   }
   html {
     @apply font-sans;
