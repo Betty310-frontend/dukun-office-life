@@ -574,27 +574,33 @@ git commit -m "Add advanceDay server action wiring the day-progression engine to
 - Consumes: `company_state` 테이블, Task 7의 `advanceDayAction`
 - Produces: 시뮬레이션 탭에 실통계/하루 진행 버튼이 연결됨 — `components/app-shell.tsx`의 "준비 중" 자리를 대체.
 
-- [ ] **Step 1: `app/page.tsx`에서 `company_state` 조회 추가**
+- [x] **Step 1: `app/page.tsx`에서 `company_state` 조회 추가**
 
 `profile`/`npcs`와 함께 `company_state` row를 조회해 `AppShell`에 prop으로 내려준다.
 
-- [ ] **Step 2: 통계 카드를 실데이터로 교체**
+- [x] **Step 2: 통계 카드를 실데이터로 교체** (사용자 요청으로 원본의 `#monthBadge` 자리에 실행 날짜 배지도 함께 추가 — 읽기 전용, 원본의 편집 가능한 `시뮬레이션 날짜` 인풋은 공유 상태라 위험해서 의도적으로 제외)
 
 `components/app-shell.tsx`의 현금/오늘 매출/광고주/회사 평판 4개 카드(현재 "준비 중" 고정 텍스트)를 `fmt(companyState.cash)`/`fmt(companyState.revenue)`/`${companyState.clients}곳`/`Math.round(companyState.reputation)`로 교체(Task 2의 `fmt` 사용).
 
-- [ ] **Step 3: "하루 진행" 버튼 연결**
+- [x] **Step 3: "하루 진행" 버튼 연결**
 
 "준비 중" 안내 문구를 제거하고 원본처럼 primary 버튼(`🎲 하루 진행`)을 추가, 클릭 시 `advanceDayAction()` 서버 액션 호출 → 결과 메시지를 토스트/인라인으로 표시 → 성공 시 `router.refresh()`로 최신 통계 반영. 로딩 중 중복 클릭 방지(버튼 `disabled` + `useTransition`).
 
-- [ ] **Step 4: 업무 배정 카드 추가**
+- [x] **Step 4: 업무 배정 카드 추가**
 
 원본의 "🗂️ 업무 배정" 카드(핵심 광고주 담당자/신규 영업 담당자/긴급 이슈 대응 담당자 3개 select, 원본 1182행)를 이식한다. `workforce`(profiles+npcs) 목록으로 옵션을 채우고, 선택 시 `company-state.ts`의 서버 액션으로 `company_state.lead_actor_type/id` 등을 저장한다.
 
-- [ ] **Step 5: 브라우저로 확인**
+- [x] **Step 5: 브라우저로 확인** (Task 7 Step 2로 미뤄뒀던 검증도 여기서 함께 수행)
 
-로그인 → 시뮬레이션 탭에서 담당자 배정 → 하루 진행 클릭 → 통계가 실제로 바뀌는지, 두 번째 클릭 시 "오늘은 이미 진행되었습니다" 안내가 뜨는지 확인. 모바일 뷰(390px)에서도 버튼/카드가 깨지지 않는지 확인.
+Chrome 자동화로 회원가입→내정보 저장→시뮬레이션 탭까지 실제로 진행하며 확인. 이 과정에서 버그 2건을 발견해 함께 고쳤다:
+1. **동시성 게이트가 최초 1회를 절대 통과 못 하는 버그**: `last_advanced_date`의 초기값이 `NULL`인데 `.neq('last_advanced_date', cs.date)`만 쓰면 SQL의 `NULL <> x`가 항상 UNKNOWN이라 매번 "오늘은 이미 진행되었습니다"만 떴다. `.or('last_advanced_date.is.null,last_advanced_date.neq.'+cs.date)`로 수정.
+2. **`bigint`/`int` 컬럼에 소수를 그대로 쓰다 실패**: `advanceDay`가 계산하는 `cash`/`revenue`(예: `.../22`)와 `stress`는 부동소수점인데 `company_state.cash/revenue`·`profiles/npcs.stress`는 정수 컬럼이라 "invalid input syntax for type bigint" 에러가 났다. DB에 쓰는 시점에만 `Math.round()`로 반올림(시뮬레이션 공식 자체는 원본처럼 그대로 부동소수점 유지 — 원본도 표시 시점 `fmt()`에서만 반올림했었다).
 
-- [ ] **Step 6: Commit**
+수정 후 실제로 "하루 진행" 클릭 → 현금/매출/광고주/평판·날짜 배지가 실데이터로 갱신되고, 담당자 배정이 새로고침 후에도 유지되는 것까지 확인했다. 동시성 게이트의 SQL 자체(조건부 UPDATE가 원자적 뮤텍스로 동작하는 것)는 로직 검토로 검증했고, 브라우저로 실제 동시 요청 경합까지 재현하지는 않았다. 모바일 390px 레이아웃 확인은 이번 세션에서는 생략함(다음에 필요 시 확인).
+
+테스트 중 만든 계정/생성된 로그·메신저·관계 데이터는 정리했고 공유 `company_state`도 초기값으로 되돌렸다 — 단, 테스트 계정(`profiles` row)은 RLS상 delete 정책이 없어 그대로 남아있다(원하면 Supabase 대시보드에서 직접 삭제 가능).
+
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
