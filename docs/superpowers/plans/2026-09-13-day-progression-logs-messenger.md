@@ -551,7 +551,7 @@ export async function advanceDayAction() {
 - `result.events`를 `daily_events`에 insert — 각 항목에 `day: cs.day, date: cs.date, category: categorizeLog(text, isWeekendDate(cs.date)), is_protagonist`를 채워서.
 - `result.messengerScenes`를 `messenger_logs`에 insert.
 
-- [ ] **Step 2: 브라우저로 수동 검증** (Task 8에서 "하루 진행" 버튼이 붙은 뒤 함께 진행 — 임시 버튼을 따로 달지 않고 그대로 다음 태스크로 이어감)
+- [x] **Step 2: 브라우저로 수동 검증** (Task 8 Step 5에서 함께 수행 — 그 과정에서 발견/수정한 버그 2건은 Task 8 Step 5 기록 참고)
 
 `npm run dev` → 로그인 → 시뮬레이션 탭에서 하루 진행 → Supabase 대시보드에서 `company_state.day`가 2로, `daily_events`/`messenger_logs`에 row가 생겼는지 확인. 연속 두 번 호출해서 두 번째는 "오늘은 이미 진행되었습니다"가 뜨는지 확인.
 

@@ -52,11 +52,13 @@ export async function advanceDayAction(): Promise<{ ok: boolean; message: string
   if (!cs) return { ok: false, message: '회사 상태를 찾을 수 없습니다.' }
 
   // 동시성 가드: 오늘 이미 진행됐으면 조건부 업데이트가 0행 반환
+  // last_advanced_date는 초기값이 NULL이라 .neq()만 쓰면 SQL의 `NULL <> x`가 항상 UNKNOWN이 되어
+  // 최초 1회는 절대 게이트를 통과하지 못한다 — is.null 분기를 함께 걸어야 한다.
   const { data: gated } = await supabase
     .from('company_state')
     .update({ last_advanced_date: cs.date })
     .eq('id', 1)
-    .neq('last_advanced_date', cs.date)
+    .or(`last_advanced_date.is.null,last_advanced_date.neq.${cs.date}`)
     .select()
     .maybeSingle()
   if (!gated) return { ok: false, message: '오늘은 이미 진행되었습니다.' }
@@ -102,12 +104,13 @@ export async function advanceDayAction(): Promise<{ ok: boolean; message: string
   const nextDate = addOneDay(cs.date)
   const weekend = isWeekendDate(cs.date)
 
+  // stress도 profiles/npcs에서 int 컬럼이라 advanceDay가 계산한 소수를 반올림해서 넣어야 한다.
   const profileStressUpdates = workforce
     .filter((w) => w.type === 'profile')
-    .map((w) => supabase.from('profiles').update({ stress: result.workforceStress[w.id] }).eq('id', w.id))
+    .map((w) => supabase.from('profiles').update({ stress: Math.round(result.workforceStress[w.id]) }).eq('id', w.id))
   const npcStressUpdates = workforce
     .filter((w) => w.type === 'npc')
-    .map((w) => supabase.from('npcs').update({ stress: result.workforceStress[w.id] }).eq('id', Number(w.id)))
+    .map((w) => supabase.from('npcs').update({ stress: Math.round(result.workforceStress[w.id]) }).eq('id', Number(w.id)))
 
   const relationshipRows = Array.from(relations.entries()).map(([key, entry]) => {
     const [actor, target] = key.split('>')
@@ -154,18 +157,24 @@ export async function advanceDayAction(): Promise<{ ok: boolean; message: string
     messengerLogRows.length ? supabase.from('messenger_logs').insert(messengerLogRows) : Promise.resolve(),
   ])
 
+  // cash/revenue는 DB에서 bigint 컬럼이라 advanceDay가 계산한 소수(예: 22로 나눈 값)를 그대로 넣으면
+  // "invalid input syntax for type bigint" 에러가 난다 — 원본도 표시 시점(fmt)에만 반올림했을 뿐 내부
+  // 계산은 부동소수점이었으므로, 시뮬레이션 공식은 그대로 두고 DB에 쓰는 시점에만 반올림한다.
   const { error: companyStateError } = await supabase
     .from('company_state')
     .update({
       day: cs.day + 1,
       date: nextDate,
-      cash: result.companyState.cash,
-      revenue: result.companyState.revenue,
-      clients: result.companyState.clients,
+      cash: Math.round(result.companyState.cash),
+      revenue: Math.round(result.companyState.revenue),
+      clients: Math.round(result.companyState.clients),
       reputation: result.companyState.reputation,
     })
     .eq('id', 1)
-  if (companyStateError) return { ok: false, message: '회사 상태 반영에 실패했습니다.' }
+  if (companyStateError) {
+    console.error('[advanceDayAction] company_state update failed:', companyStateError.message)
+    return { ok: false, message: '회사 상태 반영에 실패했습니다.' }
+  }
 
   revalidatePath('/')
   return { ok: true, message: '하루가 진행되었습니다.' }
