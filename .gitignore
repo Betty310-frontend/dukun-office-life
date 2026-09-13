@@ -1,0 +1,20 @@
+# 원본 참고용 파일 (기술스택 결정 전까지는 커밋하지 않음)
+/legacy-reference/
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Env
+.env
+.env.local
+
+# OS/IDE
+.DS_Store
+.vscode/
+.idea/
