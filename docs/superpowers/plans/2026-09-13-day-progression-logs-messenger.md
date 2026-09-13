@@ -347,7 +347,7 @@ git commit -m "Port messenger scene generator from legacy prototype"
 **Interfaces:**
 - Produces: `categorizeLog(text, isWeekend): LogCategory`, `normalizeLogText(text): string` — Task 6과 Task 9(일일 로그 탭)가 사용.
 
-- [ ] **Step 1: 구현**
+- [x] **Step 1: 구현**
 
 원본 5011-5021행(`normalizeLogText`) + 5039-5047행(`categorizeLog`)을 정규식까지 그대로 옮긴다:
 
@@ -367,11 +367,11 @@ export function categorizeLog(text: string, isWeekend = false): LogCategory {
 
 `normalizeLogText`도 원본의 제어문자 제거/개행 정리 정규식 그대로.
 
-- [ ] **Step 2: 테스트 작성 → 통과 확인**
+- [x] **Step 2: 테스트 작성 → 통과 확인**
 
 원본 순서(계절 → 주말 → 출퇴근 → 팀 오프워크 → 업무 → 기본값 offwork)가 그대로 지켜지는지 확인하는 케이스를 각 분기당 1개 이상 작성(예: `categorizeLog('[출근길] ...', false)==='commute'`, `categorizeLog('아무 일 없었다', false)==='offwork'`).
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add -A
