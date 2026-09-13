@@ -16,15 +16,33 @@ import { TABS, type TabId } from '@/lib/tabs'
 
 type Profile = ProfileInput & { id: string }
 type Npc = ProfileInput & { id: number; active: boolean }
+export interface CompanyState {
+  day: number
+  date: string
+  cash: number
+  revenue: number
+  clients: number
+  reputation: number
+  sales_mode: string
+  overtime_mode: string
+  lead_actor_type: string | null
+  lead_actor_id: string | null
+  seller_actor_type: string | null
+  seller_actor_id: string | null
+  fire_actor_type: string | null
+  fire_actor_id: string | null
+}
 
 export function AppShell({
   profile,
   npcs,
+  companyState,
   initialTab,
   error,
 }: {
   profile: Profile
   npcs: Npc[]
+  companyState: CompanyState
   initialTab: TabId
   error?: string
 }) {
@@ -61,7 +79,7 @@ export function AppShell({
         ))}
       </div>
 
-      {activeTab === 'sim' && <SimPanel me={profile} roster={npcs} />}
+      {activeTab === 'sim' && <SimPanel me={profile} roster={npcs} companyState={companyState} />}
 
       {activeTab === 'me' && (
         <Card>

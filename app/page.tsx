@@ -25,11 +25,17 @@ export default async function HomePage({
     .select('*')
     .eq('active', true)
     .order('id')
+  const { data: companyState } = await supabase
+    .from('company_state')
+    .select('*')
+    .eq('id', 1)
+    .single()
 
   return (
     <AppShell
       profile={profile}
       npcs={npcs ?? []}
+      companyState={companyState}
       initialTab={initialTab}
       error={error}
     />
