@@ -474,7 +474,10 @@ git commit -m "Port runDay orchestrator as pure advanceDay function"
 - Consumes: `lib/game/advance-day.ts`(Task 6), `lib/game/log-category.ts`(Task 5), `lib/supabase/server.ts`
 - Produces: `advanceDayAction(): Promise<{ ok: boolean; message: string }>` — Task 8(시뮬레이션 탭)의 "하루 진행" 버튼이 호출.
 
-- [ ] **Step 1: 동시성 게이트 + 데이터 조회 + 호출 + 반영**
+> **구현 시 조정**: 위 스켈레톤의 `WorkforceMember`는 `@/lib/game/advance-day`가 아니라 `@/lib/game/types`에서 export된다.
+> 또한 필드명은 `w.actorType`이 아니라 `w.type`(`ActorRef`를 상속하는 `RelatablePerson`의 필드명 그대로)이다 — 스켈레톤 코드를 그대로 베끼면 타입 에러가 난다.
+
+- [x] **Step 1: 동시성 게이트 + 데이터 조회 + 호출 + 반영**
 
 ```typescript
 'use server'
@@ -548,11 +551,11 @@ export async function advanceDayAction() {
 - `result.events`를 `daily_events`에 insert — 각 항목에 `day: cs.day, date: cs.date, category: categorizeLog(text, isWeekendDate(cs.date)), is_protagonist`를 채워서.
 - `result.messengerScenes`를 `messenger_logs`에 insert.
 
-- [ ] **Step 2: 브라우저로 수동 검증**
+- [ ] **Step 2: 브라우저로 수동 검증** (Task 8에서 "하루 진행" 버튼이 붙은 뒤 함께 진행 — 임시 버튼을 따로 달지 않고 그대로 다음 태스크로 이어감)
 
-`npm run dev` → 로그인 → 시뮬레이션 탭에서 하루 진행(Task 8 완료 후 가능 — 먼저 임시로 페이지에 테스트 버튼을 달아도 됨) → Supabase 대시보드에서 `company_state.day`가 2로, `daily_events`/`messenger_logs`에 row가 생겼는지 확인. 연속 두 번 호출해서 두 번째는 "오늘은 이미 진행되었습니다"가 뜨는지 확인.
+`npm run dev` → 로그인 → 시뮬레이션 탭에서 하루 진행 → Supabase 대시보드에서 `company_state.day`가 2로, `daily_events`/`messenger_logs`에 row가 생겼는지 확인. 연속 두 번 호출해서 두 번째는 "오늘은 이미 진행되었습니다"가 뜨는지 확인.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add -A
