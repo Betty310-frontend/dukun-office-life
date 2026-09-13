@@ -390,7 +390,7 @@ git commit -m "Port daily log categorization logic from legacy prototype"
 - Consumes: Task 2~5의 모든 `lib/game/*.ts`
 - Produces: `advanceDay(input: AdvanceDayInput): AdvanceDayResult` — Task 7(서버 액션)이 사용. 이 함수는 **DB도, DOM도 모른다** — 순수 계산만.
 
-- [ ] **Step 1: 입출력 타입 정의**
+- [x] **Step 1: 입출력 타입 정의**
 
 ```typescript
 export interface WorkforceMember {
@@ -433,7 +433,7 @@ export interface AdvanceDayResult {
 }
 ```
 
-- [ ] **Step 2: 원본 로직 이식**
+- [x] **Step 2: 원본 로직 이식**
 
 원본 5605-5717행(`runDay`)을 위 입출력 구조에 맞게 옮긴다. 대응 관계:
 - `activePeople()`/`[...ap, protagonist]` → `input.workforce`
@@ -447,7 +447,7 @@ export interface AdvanceDayResult {
 
 `getPerson`/`$(id).value` 같은 DOM 읽기는 전부 제거하고 `input.lead`/`input.seller`/`input.fire`/`input.salesMode`/`input.overtimeMode`로 대체한다. `alert(...)`/`openMeTab()`(원본 5606-5611행, 미설정 주인공 경고)은 **호출부(서버 액션)의 책임**이므로 이 함수에는 없다 — advanceDay는 항상 workforce가 유효하다고 가정.
 
-- [ ] **Step 3: 테스트 작성 → 통과 확인**
+- [x] **Step 3: 테스트 작성 → 통과 확인**
 
 `lib/game/advance-day.test.ts`:
 - 평일 입력 시 `result.companyState.revenue`가 0보다 큰지(광고주 0곳이 아닌 fixture 기준), 주말 입력 시 `revenue===0`이고 이벤트에 "휴식일" 문구가 포함되는지.
@@ -456,7 +456,7 @@ export interface AdvanceDayResult {
 - 3명 workforce로 `relations` 맵을 사전에 채워둔 뒤 호출하면, 최소 하나의 관계 엔트리 값이 호출 전후로 달라지는지(사회적 이벤트 또는 팀 이벤트가 반드시 하나는 굴러가도록 `Math.random` 고정).
 - `cash`가 음수로 갈 수 있는 극단 입력(광고주 0, 인원 많음)에서도 `NaN`이 나오지 않는지.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add -A
