@@ -211,13 +211,13 @@ git commit -m "Add Vitest test runner"
 **Interfaces:**
 - Produces: `createClient()` (브라우저용, `lib/supabase/client.ts`), `createClient()` (서버용, `lib/supabase/server.ts`, `Promise<SupabaseClient>` 반환), `updateSession(request: NextRequest)` (`lib/supabase/middleware.ts`, `Promise<NextResponse>` 반환) — 이후 모든 인증/DB 접근 태스크가 이 함수들을 사용.
 
-- [ ] **Step 1: 패키지 설치**
+- [x] **Step 1: 패키지 설치**
 
 ```bash
 npm install @supabase/supabase-js @supabase/ssr
 ```
 
-- [ ] **Step 2: 환경변수 파일 작성**
+- [x] **Step 2: 환경변수 파일 작성**
 
 `.env.local.example`:
 
@@ -235,7 +235,7 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxx
 
 `.gitignore`에 `.env.local`이 이미 포함되어 있는지 확인하고, 없으면 추가한다.
 
-- [ ] **Step 3: 브라우저 클라이언트 작성**
+- [x] **Step 3: 브라우저 클라이언트 작성**
 
 `lib/supabase/client.ts`:
 
@@ -250,7 +250,7 @@ export function createClient() {
 }
 ```
 
-- [ ] **Step 4: 서버 클라이언트 작성**
+- [x] **Step 4: 서버 클라이언트 작성**
 
 `lib/supabase/server.ts`:
 
@@ -284,7 +284,7 @@ export async function createClient() {
 }
 ```
 
-- [ ] **Step 5: 미들웨어 세션 갱신 로직 작성**
+- [x] **Step 5: 미들웨어 세션 갱신 로직 작성**
 
 `lib/supabase/middleware.ts`:
 
@@ -329,7 +329,7 @@ export async function updateSession(request: NextRequest) {
 }
 ```
 
-- [ ] **Step 6: 루트 Proxy 등록**
+- [x] **Step 6: 루트 Proxy 등록**
 
 이 프로젝트가 쓰는 Next.js 16부터 `middleware.ts` 파일 컨벤션은 deprecated이고 `proxy.ts`로 이름이 바뀌었다(export하는 함수명도 `middleware`→`proxy`). 반드시 `proxy.ts`로 만든다 — `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/proxy.md` 참고.
 
@@ -352,7 +352,7 @@ export const config = {
 
 (`lib/supabase/middleware.ts`는 헬퍼 모듈일 뿐 Next.js의 특수 파일 컨벤션이 아니므로 이름을 바꿀 필요 없다. Next.js가 특수하게 인식하는 건 프로젝트 루트의 `proxy.ts`뿐이다.)
 
-- [ ] **Step 7: 로그인 없이 접근 시 `/login`으로 리다이렉트되는지 수동 확인**
+- [x] **Step 7: 로그인 없이 접근 시 `/login`으로 리다이렉트되는지 수동 확인**
 
 ```bash
 npm run dev
@@ -361,7 +361,7 @@ curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" http://localhost:3000/
 
 Expected: 307/308 리다이렉트, `redirect_url`이 `/login`을 가리킴.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add -A
@@ -379,7 +379,7 @@ git commit -m "Connect Supabase (SSR client/server/middleware helpers)"
 **Interfaces:**
 - Produces: `profiles` 테이블 (컬럼: `id uuid PK references auth.users`, `name text`, `gender text`, `team text`, `rank text`, `role text`, `work_style text`, `mbti text`, `traits text[]`, `pref_traits text[]`, `skill int`, `sales int`, `crisis int`, `stress int`, `is_configured boolean`, `created_at timestamptz`), `npcs` 테이블 (동일 스탯 컬럼 + `active boolean`) — 이후 온보딩/로스터 태스크가 이 스키마를 사용.
 
-- [ ] **Step 1: Supabase CLI 설치 및 로그인**
+- [x] **Step 1: Supabase CLI 설치 및 로그인**
 
 ```bash
 npm install -D supabase
@@ -388,13 +388,13 @@ npx supabase login
 
 (브라우저가 열리며 사용자가 직접 로그인)
 
-- [ ] **Step 2: 로컬 프로젝트와 원격 Supabase 프로젝트 연결**
+- [x] **Step 2: 로컬 프로젝트와 원격 Supabase 프로젝트 연결**
 
 ```bash
 npx supabase link --project-ref <Task 4에서 만든 프로젝트의 ref, 대시보드 URL의 프로젝트 ID>
 ```
 
-- [ ] **Step 3: 마이그레이션 파일 작성**
+- [x] **Step 3: 마이그레이션 파일 작성**
 
 `supabase/migrations/0001_init.sql`:
 
@@ -461,7 +461,7 @@ create policy "npcs are viewable by authenticated users"
   using (true);
 ```
 
-- [ ] **Step 4: NPC 시드 데이터 작성**
+- [x] **Step 4: NPC 시드 데이터 작성**
 
 `supabase/seed.sql` (원본 `legacy-reference/원본_V31.html`의 `people` 초기값 그대로 이전):
 
@@ -476,7 +476,7 @@ insert into npcs (id, name, role, rank, team, work_style, gender, mbti, traits, 
 on conflict (id) do nothing;
 ```
 
-- [ ] **Step 5: 마이그레이션 + 시드 원격 적용**
+- [x] **Step 5: 마이그레이션 + 시드 원격 적용**
 
 ```bash
 npx supabase db push
@@ -485,11 +485,11 @@ psql "$(npx supabase status -o env | grep DB_URL | cut -d= -f2)" -f supabase/see
 
 (위 psql 명령이 로컬 환경에 따라 안 되면, Supabase 대시보드의 SQL Editor에 `supabase/seed.sql` 내용을 붙여넣어 실행해도 동일하다.)
 
-- [ ] **Step 6: 적용 확인**
+- [x] **Step 6: 적용 확인**
 
 Supabase 대시보드 → Table Editor에서 `npcs` 테이블에 3행이 보이는지 확인.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add -A
@@ -508,7 +508,7 @@ git commit -m "Add profiles/npcs schema migration and NPC seed data"
 - Consumes: 없음 (순수 로직)
 - Produces: `profileSchema: ZodSchema`, `ProfileInput` 타입, `JOB_RANKS: readonly string[]`, `DEFAULT_PROFILE: ProfileInput` — Task 9(온보딩 폼)가 이 스키마와 기본값을 사용.
 
-- [ ] **Step 1: 실패하는 테스트 작성**
+- [x] **Step 1: 실패하는 테스트 작성**
 
 `lib/validation/profile.test.ts`:
 
@@ -548,12 +548,12 @@ describe('profileSchema', () => {
 })
 ```
 
-- [ ] **Step 2: 테스트 실패 확인**
+- [x] **Step 2: 테스트 실패 확인**
 
 Run: `npm test -- lib/validation/profile.test.ts`
 Expected: FAIL (`Cannot find module './profile'`)
 
-- [ ] **Step 3: 구현 작성**
+- [x] **Step 3: 구현 작성**
 
 `lib/validation/profile.ts` (원본 `legacy-reference/원본_V31.html`의 `protagonist` 기본값과 `JOB_RANKS` 배열을 그대로 이전):
 
@@ -599,14 +599,14 @@ export const DEFAULT_PROFILE: ProfileInput = {
 }
 ```
 
-- [ ] **Step 4: 테스트 통과 확인**
+- [x] **Step 4: 테스트 통과 확인**
 
 Run: `npm test -- lib/validation/profile.test.ts`
 Expected: PASS (4 tests)
 
 `z.enum(JOB_RANKS)`에 빈 문자열 `name: ''`을 넣는 첫 테스트 케이스는 `name`이 아니라 `rank`가 원인이 되지 않도록, `DEFAULT_PROFILE.rank`가 `JOB_RANKS`에 포함된 값(`'사원'`)인지 재확인한다 — 포함되어 있으므로 통과해야 정상이다.
 
-- [ ] **Step 5: `zod` 설치 확인**
+- [x] **Step 5: `zod` 설치 확인**
 
 `npm test` 실행 전에 `zod`가 설치되어 있지 않다면:
 
@@ -614,7 +614,7 @@ Expected: PASS (4 tests)
 npm install zod
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
@@ -635,7 +635,7 @@ git commit -m "Add profile validation schema with unit tests"
 - Consumes: `createClient()` from `lib/supabase/server.ts` (Task 4)
 - Produces: `/login`, `/signup` 라우트 — Task 8(라우트 보호)이 이 경로들을 인증 예외 경로로 참조.
 
-- [ ] **Step 1: 로그인 서버 액션 작성**
+- [x] **Step 1: 로그인 서버 액션 작성**
 
 `app/login/actions.ts`:
 
@@ -663,7 +663,7 @@ export async function login(formData: FormData) {
 }
 ```
 
-- [ ] **Step 2: 로그인 페이지 작성**
+- [x] **Step 2: 로그인 페이지 작성**
 
 `app/login/page.tsx`:
 
@@ -711,7 +711,7 @@ export default async function LoginPage({
 }
 ```
 
-- [ ] **Step 3: 회원가입 서버 액션 작성**
+- [x] **Step 3: 회원가입 서버 액션 작성**
 
 `app/signup/actions.ts`:
 
@@ -737,7 +737,7 @@ export async function signup(formData: FormData) {
 }
 ```
 
-- [ ] **Step 4: 회원가입 페이지 작성**
+- [x] **Step 4: 회원가입 페이지 작성**
 
 `app/signup/page.tsx` (Step 2의 로그인 페이지와 동일한 레이아웃, `login` → `signup` 액션으로 교체):
 
@@ -785,11 +785,11 @@ export default async function SignupPage({
 }
 ```
 
-- [ ] **Step 5: `middleware.ts`의 인증 예외 경로에 `/signup` 포함 확인**
+- [x] **Step 5: `middleware.ts`의 인증 예외 경로에 `/signup` 포함 확인**
 
 Task 4 Step 5에서 작성한 `isAuthRoute` 체크가 이미 `/login`, `/signup` 둘 다 포함하고 있는지 확인 (포함되어 있음).
 
-- [ ] **Step 6: 실행 화면으로 직접 확인**
+- [x] **Step 6: 실행 화면으로 직접 확인**
 
 ```bash
 npm run dev
@@ -797,7 +797,7 @@ npm run dev
 
 브라우저에서 `http://localhost:3000/signup`으로 이동해 실제 이메일/비밀번호로 가입 → `/login`으로 리다이렉트 → 로그인 → `/`로 리다이렉트되는지 확인. (Supabase 프로젝트의 이메일 확인 설정에 따라 "이메일 확인" 안내가 뜰 수 있음 — 대시보드 Authentication → Providers → Email에서 "Confirm email"을 꺼두면 로컬 개발이 편함.)
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add -A
@@ -819,7 +819,7 @@ git commit -m "Add signup and login pages with Supabase Auth"
 
 미들웨어 자체(`NextRequest`/`NextResponse` 의존)는 유닛 테스트하기 번거로우므로, 리다이렉트 판단 로직만 순수 함수로 뽑아 테스트한다.
 
-- [ ] **Step 1: 실패하는 테스트 작성**
+- [x] **Step 1: 실패하는 테스트 작성**
 
 `lib/auth/redirect-decision.test.ts`:
 
@@ -865,12 +865,12 @@ describe('decideRedirect', () => {
 })
 ```
 
-- [ ] **Step 2: 테스트 실패 확인**
+- [x] **Step 2: 테스트 실패 확인**
 
 Run: `npm test -- lib/auth/redirect-decision.test.ts`
 Expected: FAIL (`Cannot find module './redirect-decision'`)
 
-- [ ] **Step 3: 구현 작성**
+- [x] **Step 3: 구현 작성**
 
 `lib/auth/redirect-decision.ts`:
 
@@ -896,12 +896,12 @@ export function decideRedirect(input: {
 }
 ```
 
-- [ ] **Step 4: 테스트 통과 확인**
+- [x] **Step 4: 테스트 통과 확인**
 
 Run: `npm test -- lib/auth/redirect-decision.test.ts`
 Expected: PASS (7 tests)
 
-- [ ] **Step 5: 미들웨어에서 이 함수 사용하도록 교체**
+- [x] **Step 5: 미들웨어에서 이 함수 사용하도록 교체**
 
 `lib/supabase/middleware.ts`의 `isAuthRoute` 체크와 리다이렉트 부분을 다음으로 교체 (claims 확인 이후, `profiles.is_configured` 조회 추가):
 
@@ -935,7 +935,7 @@ Expected: PASS (7 tests)
 
 파일 상단에 `import { decideRedirect } from '@/lib/auth/redirect-decision'` 추가.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
@@ -954,7 +954,7 @@ git commit -m "Add onboarding redirect gate to middleware"
 - Consumes: `profileSchema`, `DEFAULT_PROFILE`, `JOB_RANKS` (Task 6), `createClient()` from `lib/supabase/server.ts` (Task 4)
 - Produces: `/onboarding` 라우트 — `profiles` row를 생성/갱신하고 `is_configured=true`로 표시.
 
-- [ ] **Step 1: 온보딩 서버 액션 작성**
+- [x] **Step 1: 온보딩 서버 액션 작성**
 
 `app/onboarding/actions.ts`:
 
@@ -1006,7 +1006,7 @@ export async function saveProfile(formData: FormData) {
 }
 ```
 
-- [ ] **Step 2: 온보딩 페이지 작성**
+- [x] **Step 2: 온보딩 페이지 작성**
 
 `app/onboarding/page.tsx` (원본의 "내정보" 입력 폼 필드를 그대로 반영: 이름/성별/팀/직급/직무/업무스타일/MBTI):
 
@@ -1080,7 +1080,7 @@ export default async function OnboardingPage({
 }
 ```
 
-- [ ] **Step 3: 실행 화면으로 확인**
+- [x] **Step 3: 실행 화면으로 확인**
 
 ```bash
 npm run dev
@@ -1088,7 +1088,7 @@ npm run dev
 
 로그인 상태에서 `/onboarding`으로 접근 → 폼 제출 → `/`로 리다이렉트되는지, Supabase 대시보드 Table Editor에서 `profiles` 테이블에 row가 생기고 `is_configured=true`인지 확인.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add -A
@@ -1107,7 +1107,7 @@ git commit -m "Add onboarding page for character setup"
 - Consumes: `createClient()` from `lib/supabase/server.ts` (Task 4), `profiles`/`npcs` 테이블 (Task 5)
 - Produces: `RosterCard` 컴포넌트(`{ name, role, rank, team, traits }` props) — 이후 "하루 진행"/로스터 상세 플랜이 이 화면을 확장.
 
-- [ ] **Step 1: 로스터 카드 컴포넌트 작성**
+- [x] **Step 1: 로스터 카드 컴포넌트 작성**
 
 `components/roster-card.tsx`:
 
@@ -1141,7 +1141,7 @@ export function RosterCard({
 }
 ```
 
-- [ ] **Step 2: 홈 페이지에서 내 프로필 + NPC 로스터 조회 및 렌더**
+- [x] **Step 2: 홈 페이지에서 내 프로필 + NPC 로스터 조회 및 렌더**
 
 `app/page.tsx`:
 
@@ -1198,7 +1198,7 @@ export default async function HomePage() {
 }
 ```
 
-- [ ] **Step 3: 실행 화면으로 최종 확인**
+- [x] **Step 3: 실행 화면으로 최종 확인**
 
 ```bash
 npm run dev
@@ -1206,7 +1206,7 @@ npm run dev
 
 브라우저에서 회원가입 → 로그인 → 온보딩 → 홈 화면까지 전체 흐름을 직접 타보면서, 내 프로필 카드와 NPC 3명(김팀장/이대리/박과장) 카드가 모두 보이는지 확인한다. 이 화면을 같이 보면서 다음 이터레이션(하루 진행/일일로그/메신저/대화하기)을 무엇부터 다듬을지 정한다.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add -A
