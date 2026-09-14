@@ -239,6 +239,15 @@ export function SimPanel({
         </Button>
       </section>
 
+      <Card>
+        <CardContent>
+          <h3 className="text-base font-bold">📰 오늘의 결과</h3>
+          <div className="mt-3 rounded-xl border border-border bg-accent/60 p-3 text-sm text-muted-foreground">
+            {resultMessage ?? `${companyState.day}일차 · 아직 오늘의 '하루 진행'을 실행하지 않았어요.`}
+          </div>
+        </CardContent>
+      </Card>
+
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-bold">👥 직원 명단</h2>
@@ -330,15 +339,6 @@ export function SimPanel({
           </CardContent>
         </Card>
       </section>
-
-      <Card>
-        <CardContent>
-          <h3 className="text-base font-bold">📰 오늘의 결과</h3>
-          <div className="mt-3 rounded-xl border border-border bg-accent/60 p-3 text-sm text-muted-foreground">
-            {resultMessage ?? `${companyState.day}일차 · 아직 오늘의 '하루 진행'을 실행하지 않았어요.`}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
