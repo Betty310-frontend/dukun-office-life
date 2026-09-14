@@ -186,7 +186,7 @@ export function MessengerPanel({
                 아직 대화가 없어요
               </div>
             ) : (
-              <div className="max-h-[420px] overflow-y-auto rounded-xl border border-border">
+              <div className="max-h-[220px] overflow-y-auto rounded-xl border border-border sm:max-h-[420px]">
                 <div className="divide-y divide-border">
                   {days.map(([date, scenes]) => {
                     const active = date === activeDate

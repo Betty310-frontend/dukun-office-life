@@ -73,7 +73,7 @@ export function LogsPanel({ events }: { events: DailyEventRow[] }) {
               type="date"
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="w-auto"
+              className="w-full sm:w-auto"
             />
           </div>
           <Button type="button" variant="secondary" disabled={!dateFilter} onClick={() => setDateFilter('')}>
