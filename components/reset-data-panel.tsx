@@ -1,24 +1,56 @@
+'use client'
+
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ComingSoonBadge } from '@/components/coming-soon-badge'
+import { resetSimulationAction } from '@/app/actions/reset-data'
 
 export function ResetDataPanel() {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [confirming, setConfirming] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+
+  function handleReset() {
+    startTransition(async () => {
+      const result = await resetSimulationAction()
+      setMessage(result.message)
+      setConfirming(false)
+      if (result.ok) router.refresh()
+    })
+  }
+
   return (
     <Card>
       <CardContent>
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div>
-            <h2 className="text-lg font-bold">🗑️ 데이터 초기화</h2>
-            <p className="mt-1 text-sm text-muted-foreground">현재 회사에 저장된 모든 데이터를 완전히 초기화합니다.</p>
-          </div>
-          <ComingSoonBadge />
-        </div>
+        <h2 className="text-lg font-bold">🗑️ 데이터 초기화</h2>
+        <p className="mt-1 text-sm text-muted-foreground">시뮬레이션 진행 기록을 처음 상태로 되돌립니다.</p>
 
         <div className="mt-4 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
-          직원 명단, 내정보, 인간관계, 대화 기록, 메신저, 일일 로그, 회사 상태와 시뮬레이션 진행 기록이 모두 삭제돼요.
+          일일 로그, 메신저 대화, 인간관계, 회사 상태(자금·매출·광고주·평판·담당자 배정), NPC 스트레스가 초기화돼요.
+          내정보(프로필)와 직원 명단은 그대로 유지돼요.
         </div>
 
-        <Button type="button" variant="destructive" disabled className="mt-4">데이터 초기화</Button>
+        {!confirming ? (
+          <Button type="button" variant="destructive" className="mt-4" onClick={() => setConfirming(true)}>
+            데이터 초기화
+          </Button>
+        ) : (
+          <div className="mt-4 rounded-xl border border-destructive/40 bg-destructive/10 p-3">
+            <p className="text-sm font-bold text-destructive">정말 초기화하시겠습니까? 되돌릴 수 없습니다.</p>
+            <div className="mt-3 flex gap-2">
+              <Button type="button" variant="secondary" disabled={isPending} onClick={() => setConfirming(false)}>
+                취소
+              </Button>
+              <Button type="button" variant="destructive" disabled={isPending} onClick={handleReset}>
+                초기화하기
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {message && <p className="mt-3 text-sm text-muted-foreground">{message}</p>}
       </CardContent>
     </Card>
   )
