@@ -8,7 +8,7 @@ import { SimPanel } from '@/components/sim-panel'
 import { LogsPanel, type DailyEventRow } from '@/components/logs-panel'
 import { MessengerPanel, type MessengerLogRow } from '@/components/messenger-panel'
 import { TalkPanel } from '@/components/talk-panel'
-import { RelationshipsPanel } from '@/components/relationships-panel'
+import { RelationshipsPanel, type RelationRow } from '@/components/relationships-panel'
 import { ResetDataPanel } from '@/components/reset-data-panel'
 import { saveProfile } from '@/app/onboarding/actions'
 import type { ProfileInput } from '@/lib/validation/profile'
@@ -41,6 +41,7 @@ export function AppShell({
   dailyEvents,
   messengerLogs,
   profiles,
+  relationships,
   initialTab,
   error,
 }: {
@@ -49,7 +50,8 @@ export function AppShell({
   companyState: CompanyState
   dailyEvents: DailyEventRow[]
   messengerLogs: MessengerLogRow[]
-  profiles: { id: string; name: string }[]
+  profiles: Profile[]
+  relationships: RelationRow[]
   initialTab: TabId
   error?: string
 }) {
@@ -118,7 +120,9 @@ export function AppShell({
         />
       )}
       {activeTab === 'talk' && <TalkPanel people={npcs} />}
-      {activeTab === 'relationships' && <RelationshipsPanel />}
+      {activeTab === 'relationships' && (
+        <RelationshipsPanel profiles={profiles} npcs={npcs} relationships={relationships} />
+      )}
       {activeTab === 'resetdata' && <ResetDataPanel />}
     </div>
   )

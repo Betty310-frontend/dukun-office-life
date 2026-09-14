@@ -41,11 +41,14 @@ export default async function HomePage({
     .order('date', { ascending: false })
     .order('created_at', { ascending: true })
   // 하루 진행은 is_configured인 모든 프로필을 대상으로 이벤트를 생성하므로(여러 실유저가 회사를 공유),
-  // 메신저 대화 참여자 이름을 표시하려면 본인 프로필뿐 아니라 다른 유저의 이름도 필요하다.
+  // 메신저 참여자 이름 표시·인간관계 탭 모두 본인 프로필뿐 아니라 다른 유저 전체가 필요하다.
   const { data: allProfiles } = await supabase
     .from('profiles')
-    .select('id, name')
+    .select('*')
     .eq('is_configured', true)
+  const { data: relationships } = await supabase
+    .from('relationships')
+    .select('*')
 
   return (
     <AppShell
@@ -55,6 +58,7 @@ export default async function HomePage({
       dailyEvents={dailyEvents ?? []}
       messengerLogs={messengerLogs ?? []}
       profiles={allProfiles ?? []}
+      relationships={relationships ?? []}
       initialTab={initialTab}
       error={error}
     />

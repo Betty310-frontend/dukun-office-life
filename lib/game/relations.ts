@@ -81,6 +81,22 @@ export function romanticPotential(map: RelationsMap, a: RelatablePerson, b: Rela
   return clamp(match * 0.55 + (r.affection / 100) * 0.25 + (r.trust / 100) * 0.15 - (r.conflict / 100) * 0.25, 0, 1)
 }
 
+// 원본 1860행(relationLabel) verbatim 포팅.
+export function relationLabel(r: RelationEntry): string {
+  if (r.conflict >= 70) return '갈등 심함'
+  if (r.trust >= 75 && r.affection >= 70) return '매우 가까움'
+  if (r.trust >= 65) return '신뢰함'
+  if (r.affection >= 65) return '호감'
+  if (r.conflict >= 45) return '불편함'
+  return '보통'
+}
+
+// 원본 renderRelations()(~1968행)가 화면에 쓰는 쌍방 평균 관계 점수(0~100) 공식 verbatim 포팅.
+export function relationshipOverallScore(map: RelationsMap, a: ActorRef, b: ActorRef): number {
+  const score = (relationshipScore(map, a, b) + relationshipScore(map, b, a)) / 2
+  return Math.round(((score + 0.5) / 1.5) * 100)
+}
+
 export function applySocialShift(
   map: RelationsMap,
   a: RelatablePerson,
