@@ -146,7 +146,7 @@ export function SimPanel({
           </div>
         </div>
 
-        <div aria-hidden className="relative z-[2] h-[145px] min-w-0 sm:h-[170px]">
+        <div aria-hidden className="relative z-[2] hidden h-[170px] min-w-0 sm:block">
           <div className="absolute top-3 left-2 flex -rotate-3 items-center gap-1.5 rounded-xl border border-[#efdbe4] bg-[#fffafd] px-2.5 py-2 text-[11px] shadow-[0_8px_20px_rgba(181,93,128,0.08)]">
             <span>📊</span>
             <b className="font-bold">성과 보고서</b>
