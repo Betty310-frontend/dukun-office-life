@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type RefObject } from 'react'
 
 const SIZE = 44
 const STROKE = 3
@@ -8,25 +8,29 @@ const RADIUS = (SIZE - STROKE) / 2
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 const SHOW_AFTER_PX = 400
 
-export function ScrollToTopButton() {
+export function ScrollToTopButton({ scrollRef }: { scrollRef: RefObject<HTMLElement | null> }) {
   const [progress, setProgress] = useState(0)
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+
     function handleScroll() {
-      const scrollTop = window.scrollY
-      const scrollable = document.documentElement.scrollHeight - window.innerHeight
+      if (!el) return
+      const scrollTop = el.scrollTop
+      const scrollable = el.scrollHeight - el.clientHeight
       setProgress(scrollable > 0 ? Math.min(1, Math.max(0, scrollTop / scrollable)) : 0)
       setVisible(scrollTop > SHOW_AFTER_PX)
     }
     handleScroll()
-    window.addEventListener('scroll', handleScroll, { passive: true })
+    el.addEventListener('scroll', handleScroll, { passive: true })
     window.addEventListener('resize', handleScroll)
     return () => {
-      window.removeEventListener('scroll', handleScroll)
+      el.removeEventListener('scroll', handleScroll)
       window.removeEventListener('resize', handleScroll)
     }
-  }, [])
+  }, [scrollRef])
 
   if (!visible) return null
 
@@ -36,7 +40,7 @@ export function ScrollToTopButton() {
     <button
       type="button"
       aria-label="맨 위로 이동"
-      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}
       className="fixed right-3 bottom-3 z-40 grid size-11 place-items-center rounded-full border border-border bg-card shadow-lg shadow-black/10 transition-transform hover:scale-105 sm:right-5 sm:bottom-5"
     >
       <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} className="absolute inset-0 -rotate-90">

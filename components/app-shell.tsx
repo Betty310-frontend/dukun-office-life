@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { ProfileFormFields } from '@/components/profile-form-fields'
@@ -72,16 +72,17 @@ export function AppShell({
 }) {
   const [activeTab, setActiveTab] = useState<TabId>(initialTab)
   const router = useRouter()
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   function selectTab(tab: TabId) {
     setActiveTab(tab)
     router.replace(`/?tab=${tab}`, { scroll: false })
-    window.scrollTo({ top: 0, behavior: 'instant' })
+    scrollRef.current?.scrollTo({ top: 0, behavior: 'instant' })
   }
 
   return (
-    <div className="mx-auto max-w-3xl p-4 sm:p-6">
-      <div className="sticky top-2 z-10 mb-4 overflow-hidden rounded-2xl border border-border bg-card/80 backdrop-blur">
+    <div className="mx-auto flex h-dvh max-w-3xl flex-col p-4 sm:p-6">
+      <div className="mb-4 shrink-0 overflow-hidden rounded-2xl border border-border bg-card">
         <div
           className="flex items-center justify-between gap-2 px-3 py-2 text-primary-foreground"
           style={{ background: 'linear-gradient(135deg,var(--primary),color-mix(in oklch,var(--primary),black 12%))' }}
@@ -113,55 +114,57 @@ export function AppShell({
         </div>
       </div>
 
-      {activeTab === 'sim' && <SimPanel me={profile} roster={npcs} allRoster={allNpcs} companyState={companyState} />}
+      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        {activeTab === 'sim' && <SimPanel me={profile} roster={npcs} allRoster={allNpcs} companyState={companyState} />}
 
-      {activeTab === 'me' && (
-        <Card>
-          <CardContent>
-            <h2 className="text-lg font-bold">🌷 내정보</h2>
-            <p className="mt-1 mb-4 text-sm text-muted-foreground">
-              언제든 나의 정보를 다시 수정할 수 있어요.
-            </p>
-            <ProfileFormFields
-              action={saveProfile}
-              profile={profile}
-              error={error}
-              submitLabel="정보 저장"
-              redirectTo="/?tab=me"
-            />
-          </CardContent>
-        </Card>
-      )}
+        {activeTab === 'me' && (
+          <Card>
+            <CardContent>
+              <h2 className="text-lg font-bold">🌷 내정보</h2>
+              <p className="mt-1 mb-4 text-sm text-muted-foreground">
+                언제든 나의 정보를 다시 수정할 수 있어요.
+              </p>
+              <ProfileFormFields
+                action={saveProfile}
+                profile={profile}
+                error={error}
+                submitLabel="정보 저장"
+                redirectTo="/?tab=me"
+              />
+            </CardContent>
+          </Card>
+        )}
 
-      {activeTab === 'logs' && <LogsPanel events={dailyEvents} />}
-      {activeTab === 'messenger' && (
-        <MessengerPanel
-          me={profile}
-          roster={npcs}
-          profiles={profiles}
-          logs={messengerLogs}
-          day={companyState.day}
-          lastManualChatDay={companyState.last_manual_chat_day}
-        />
-      )}
-      {activeTab === 'talk' && (
-        <TalkPanel
-          me={profile}
-          profiles={profiles}
-          npcs={npcs}
-          relationships={relationships}
-          conversations={conversations}
-          conversationMessages={conversationMessages}
-          talkMemories={talkMemories}
-          companyDate={companyState.date}
-        />
-      )}
-      {activeTab === 'relationships' && (
-        <RelationshipsPanel profiles={profiles} npcs={npcs} relationships={relationships} talkMemories={talkMemories} />
-      )}
-      {activeTab === 'resetdata' && <ResetDataPanel />}
+        {activeTab === 'logs' && <LogsPanel events={dailyEvents} />}
+        {activeTab === 'messenger' && (
+          <MessengerPanel
+            me={profile}
+            roster={npcs}
+            profiles={profiles}
+            logs={messengerLogs}
+            day={companyState.day}
+            lastManualChatDay={companyState.last_manual_chat_day}
+          />
+        )}
+        {activeTab === 'talk' && (
+          <TalkPanel
+            me={profile}
+            profiles={profiles}
+            npcs={npcs}
+            relationships={relationships}
+            conversations={conversations}
+            conversationMessages={conversationMessages}
+            talkMemories={talkMemories}
+            companyDate={companyState.date}
+          />
+        )}
+        {activeTab === 'relationships' && (
+          <RelationshipsPanel profiles={profiles} npcs={npcs} relationships={relationships} talkMemories={talkMemories} />
+        )}
+        {activeTab === 'resetdata' && <ResetDataPanel />}
+      </div>
 
-      <ScrollToTopButton />
+      <ScrollToTopButton scrollRef={scrollRef} />
     </div>
   )
 }
