@@ -207,6 +207,30 @@ export async function sendNpcTalkAction(
   return { ok: true, message: reply, reply, delta, memory }
 }
 
+export async function generateProfileTalkChoicesAction(
+  otherProfileId: string
+): Promise<{ ok: boolean; message: string; choices?: TalkChoice[] }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, message: '로그인이 필요합니다.' }
+  if (otherProfileId === user.id) return { ok: false, message: '자기 자신과는 대화할 수 없습니다.' }
+
+  const { data: cs } = await supabase.from('company_state').select('date').eq('id', 1).single()
+  if (!cs) return { ok: false, message: '회사 상태를 찾을 수 없습니다.' }
+
+  const meRef: ActorRef = { type: 'profile', id: user.id }
+  const otherRef: ActorRef = { type: 'profile', id: otherProfileId }
+  const [me, other] = await Promise.all([fetchMember(supabase, meRef), fetchMember(supabase, otherRef)])
+  if (!me || !other) return { ok: false, message: '대상을 찾을 수 없습니다.' }
+
+  const relation = await fetchRelation(supabase, meRef, otherRef)
+  const aiChoices = await generateTalkChoices(other, me, relation)
+  const choices = aiChoices ?? fallbackTalkChoices(`profile:${otherProfileId}`, cs.date)
+  return { ok: true, message: '', choices }
+}
+
 export async function sendConversationMessageAction(
   other: ActorRef,
   text: string

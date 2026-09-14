@@ -6,7 +6,12 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { createClient } from '@/lib/supabase/client'
-import { sendConversationMessageAction, sendNpcTalkAction, startNpcTalkAction } from '@/app/actions/talk'
+import {
+  generateProfileTalkChoicesAction,
+  sendConversationMessageAction,
+  sendNpcTalkAction,
+  startNpcTalkAction,
+} from '@/app/actions/talk'
 import { relationLabel } from '@/lib/game/relations'
 import type { ActorType, RelationEntry } from '@/lib/game/relations'
 import type { TalkChoice } from '@/lib/game/talk'
@@ -131,7 +136,7 @@ export function TalkPanel({
       <CardContent>
         <h2 className="text-lg font-bold">🗨️ 대화하기</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          직원을 선택해 대화를 시작하세요. NPC와는 하루에 한 번, 원하는 대화 시작 문장을 골라 대화할 수 있어요.
+          직원을 선택해 대화를 시작하세요. AI가 만든 대화 선택지 중 하나를 골라 대화해요. NPC와는 하루에 한 번만 가능해요.
         </p>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-[240px_1fr]">
@@ -281,12 +286,13 @@ function ConversationThread({
     memory: { text: string } | null
   } | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
-  const [draft, setDraft] = useState('')
 
-  function handleStartTalk() {
-    if (selected.type !== 'npc') return
+  function handleGenerateChoices() {
     startTransition(async () => {
-      const result = await startNpcTalkAction(Number(selected.id))
+      const result =
+        selected.type === 'npc'
+          ? await startNpcTalkAction(Number(selected.id))
+          : await generateProfileTalkChoicesAction(selected.id)
       if (!result.ok) {
         setErrorMsg(result.message)
         return
@@ -296,27 +302,23 @@ function ConversationThread({
   }
 
   function handlePickChoice(choice: TalkChoice) {
-    if (selected.type !== 'npc') return
     startTransition(async () => {
-      const res = await sendNpcTalkAction(Number(selected.id), choice)
-      if (!res.ok) {
-        setErrorMsg(res.message)
+      if (selected.type === 'npc') {
+        const res = await sendNpcTalkAction(Number(selected.id), choice)
+        if (!res.ok) {
+          setErrorMsg(res.message)
+          setChoices(null)
+          return
+        }
+        setTalkResult({ reply: res.reply!, delta: res.delta!, memory: res.memory ?? null })
         setChoices(null)
+        router.refresh()
         return
       }
-      setTalkResult({ reply: res.reply!, delta: res.delta!, memory: res.memory ?? null })
-      setChoices(null)
-      router.refresh()
-    })
-  }
 
-  function handleSend() {
-    if (selected.type !== 'profile' || !draft.trim()) return
-    const text = draft
-    setDraft('')
-    startTransition(async () => {
-      const res = await sendConversationMessageAction({ type: 'profile', id: selected.id }, text)
+      const res = await sendConversationMessageAction({ type: 'profile', id: selected.id }, choice.text)
       if (!res.ok) setErrorMsg(res.message)
+      setChoices(null)
       router.refresh()
     })
   }
@@ -401,7 +403,7 @@ function ConversationThread({
                 </div>
               )
             ) : (
-              <Button type="button" disabled={isPending} onClick={handleStartTalk}>
+              <Button type="button" disabled={isPending} onClick={handleGenerateChoices}>
                 {isPending ? (
                   <span className="flex items-center gap-2">
                     <span className="inline-block size-3 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
@@ -414,19 +416,40 @@ function ConversationThread({
             )}
           </div>
         ) : (
-          <div className="flex gap-2">
-            <Input
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSend()
-              }}
-              placeholder="메시지를 입력하세요"
-              disabled={isPending}
-            />
-            <Button type="button" disabled={isPending || !draft.trim()} onClick={handleSend}>
-              전송
-            </Button>
+          <div className="grid gap-2 rounded-xl border border-border bg-accent/60 p-3">
+            {choices ? (
+              isPending ? (
+                <p className="flex items-center gap-2 py-1 text-xs text-muted-foreground">
+                  <span className="inline-block size-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  전송하는 중...
+                </p>
+              ) : (
+                <div className="grid gap-2">
+                  {choices.map((c, i) => (
+                    <Button
+                      key={i}
+                      type="button"
+                      variant="secondary"
+                      onClick={() => handlePickChoice(c)}
+                      className="h-auto justify-start whitespace-normal py-2 text-left"
+                    >
+                      {c.text}
+                    </Button>
+                  ))}
+                </div>
+              )
+            ) : (
+              <Button type="button" disabled={isPending} onClick={handleGenerateChoices}>
+                {isPending ? (
+                  <span className="flex items-center gap-2">
+                    <span className="inline-block size-3 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                    후보 만드는 중...
+                  </span>
+                ) : (
+                  '메시지 선택하기'
+                )}
+              </Button>
+            )}
           </div>
         )}
 
