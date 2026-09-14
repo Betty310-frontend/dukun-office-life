@@ -8,7 +8,6 @@ import { RosterCard } from '@/components/roster-card'
 import { advanceDayAction } from '@/app/actions/advance-day'
 import { assignRole, setOvertimeMode, setSalesMode } from '@/app/actions/company-state'
 import { fmt } from '@/lib/game/format'
-import { formatDate, seasonName, weekdayNameFromDate } from '@/lib/game/date'
 import type { CompanyState } from '@/components/app-shell'
 import type { ActorType } from '@/lib/game/relations'
 import type { OvertimeMode, SalesMode } from '@/lib/game/advance-day'
@@ -168,15 +167,8 @@ export function SimPanel({
       <section className="grid gap-4 sm:grid-cols-[1.1fr_.9fr]">
         <Card>
           <CardContent>
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <h2 className="text-base font-bold">📌 오늘의 운영 현황</h2>
-                <p className="mt-1 text-xs text-muted-foreground">광고주 수와 팀 처리용량의 균형이 중요해요.</p>
-              </div>
-              <span className="inline-block rounded-full border border-border px-2.5 py-1.5 text-[13px]">
-                {formatDate(companyState.date)} · {weekdayNameFromDate(companyState.date)} · {seasonName(companyState.date)}
-              </span>
-            </div>
+            <h2 className="text-base font-bold">📌 오늘의 운영 현황</h2>
+            <p className="mt-1 text-xs text-muted-foreground">광고주 수와 팀 처리용량의 균형이 중요해요.</p>
             <div className="mt-4 grid grid-cols-2 gap-3">
               {[
                 { label: '현금', value: fmt(companyState.cash) },
