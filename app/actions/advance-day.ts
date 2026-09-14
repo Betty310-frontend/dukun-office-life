@@ -128,15 +128,23 @@ export async function advanceDayAction(): Promise<{ ok: boolean; message: string
     forced: s.forced,
   }))
 
-  await Promise.all([
+  const writeResults = await Promise.all([
     ...profileStressUpdates,
     ...npcStressUpdates,
     relationshipRows.length
       ? supabase.from('relationships').upsert(relationshipRows, { onConflict: 'actor_type,actor_id,target_type,target_id' })
-      : Promise.resolve(),
-    dailyEventRows.length ? supabase.from('daily_events').insert(dailyEventRows) : Promise.resolve(),
-    messengerLogRows.length ? supabase.from('messenger_logs').insert(messengerLogRows) : Promise.resolve(),
+      : Promise.resolve({ error: null }),
+    dailyEventRows.length ? supabase.from('daily_events').insert(dailyEventRows) : Promise.resolve({ error: null }),
+    messengerLogRows.length ? supabase.from('messenger_logs').insert(messengerLogRows) : Promise.resolve({ error: null }),
   ])
+  const failedWrite = writeResults.find((r) => r.error)
+  if (failedWrite) {
+    console.error('[advanceDayAction] partial write failed:', failedWrite.error?.message)
+    // 이 시점엔 위 동시성 가드가 이미 last_advanced_date를 오늘 날짜로 찍어둔 상태라, 되돌리지
+    // 않으면 day/date는 그대로인데 재시도 자체가 "오늘은 이미 진행되었습니다"로 영구히 막힌다.
+    await supabase.from('company_state').update({ last_advanced_date: null }).eq('id', 1)
+    return { ok: false, message: '하루 진행 중 일부 데이터 저장에 실패했습니다. 다시 시도해주세요.' }
+  }
 
   // cash/revenue는 DB에서 bigint 컬럼이라 advanceDay가 계산한 소수(예: 22로 나눈 값)를 그대로 넣으면
   // "invalid input syntax for type bigint" 에러가 난다 — 원본도 표시 시점(fmt)에만 반올림했을 뿐 내부
