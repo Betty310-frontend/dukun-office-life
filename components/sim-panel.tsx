@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { RosterCard } from '@/components/roster-card'
+import { NpcEditor } from '@/components/npc-editor'
 import { advanceDayAction } from '@/app/actions/advance-day'
 import { assignRole, setOvertimeMode, setSalesMode } from '@/app/actions/company-state'
 import { fmt } from '@/lib/game/format'
@@ -46,6 +47,7 @@ interface RosterStats {
   rank: string
   team: string
   traits: string[]
+  pref_traits: string[]
   gender: string
   mbti: string
   work_style: string
@@ -58,10 +60,12 @@ interface RosterStats {
 export function SimPanel({
   me,
   roster,
+  allRoster,
   companyState,
 }: {
   me: RosterStats & { id: string }
   roster: (RosterStats & { id: number; active: boolean })[]
+  allRoster: (RosterStats & { id: number; active: boolean })[]
   companyState: CompanyState
 }) {
   const router = useRouter()
@@ -268,7 +272,7 @@ export function SimPanel({
             stress={me.stress}
             compact
           />
-          {roster.map((npc) => (
+          {allRoster.map((npc) => (
             <RosterCard
               key={npc.id}
               name={npc.name}
@@ -285,6 +289,27 @@ export function SimPanel({
               stress={npc.stress}
               active={npc.active}
               compact
+              footer={
+                <NpcEditor
+                  npc={{
+                    id: npc.id,
+                    name: npc.name,
+                    gender: npc.gender,
+                    team: npc.team,
+                    rank: npc.rank,
+                    role: npc.role,
+                    work_style: npc.work_style,
+                    mbti: npc.mbti,
+                    traits: npc.traits,
+                    pref_traits: npc.pref_traits,
+                    skill: npc.skill,
+                    sales: npc.sales,
+                    crisis: npc.crisis,
+                    stress: npc.stress,
+                    active: npc.active,
+                  }}
+                />
+              }
             />
           ))}
         </div>
@@ -334,7 +359,7 @@ export function SimPanel({
               <div className="flex justify-between"><span className="text-muted-foreground">일 목표 매출</span><b>₩1,500,000</b></div>
               <div className="flex justify-between"><span className="text-muted-foreground">권장 광고주 수</span><b>4~7곳</b></div>
               <div className="flex justify-between"><span className="text-muted-foreground">위험 스트레스</span><b>80 이상</b></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">퇴사 처리</span><b>사용자 직접</b></div>
+              <div className="flex justify-between"><span className="text-muted-foreground">퇴사 처리</span><b>직원 카드에서 가능</b></div>
             </div>
           </CardContent>
         </Card>

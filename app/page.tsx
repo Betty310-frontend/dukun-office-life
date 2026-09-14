@@ -25,6 +25,9 @@ export default async function HomePage({
     .select('*')
     .eq('active', true)
     .order('id')
+  // 시뮬레이션 탭의 직원 명단(추가/수정/퇴사 처리)만 퇴사한 NPC도 같이 보여준다 — 메신저·대화하기·인간관계·
+  // 업무배정은 위 active-only npcs를 그대로 쓴다.
+  const { data: allNpcs } = await supabase.from('npcs').select('*').order('id')
   const { data: companyState } = await supabase
     .from('company_state')
     .select('*')
@@ -65,6 +68,7 @@ export default async function HomePage({
     <AppShell
       profile={profile}
       npcs={npcs ?? []}
+      allNpcs={allNpcs ?? []}
       companyState={companyState}
       dailyEvents={dailyEvents ?? []}
       messengerLogs={messengerLogs ?? []}

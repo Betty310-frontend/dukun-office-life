@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { roleLabel } from '@/lib/game/compatibility'
 
@@ -41,6 +42,7 @@ export function RosterCard({
   stress,
   active = true,
   compact = false,
+  footer,
 }: {
   name: string
   role: string
@@ -56,12 +58,13 @@ export function RosterCard({
   stress: number
   active?: boolean
   compact?: boolean
+  footer?: ReactNode
 }) {
   const initial = name.trim().charAt(0) || '?'
   const stats = { skill, sales, crisis, stress }
 
   return (
-    <Card size={compact ? 'sm' : 'default'}>
+    <Card size={compact ? 'sm' : 'default'} className={active ? undefined : 'opacity-70'}>
       <CardContent>
         <div className="flex items-start gap-3">
           <div
@@ -105,6 +108,8 @@ export function RosterCard({
         {traits.length > 0 && (
           <p className={`text-xs text-muted-foreground ${compact ? 'mt-2 truncate' : 'mt-2.5'}`}>{traits.join(', ')}</p>
         )}
+
+        {footer && <div className={compact ? 'mt-2' : 'mt-3'}>{footer}</div>}
       </CardContent>
     </Card>
   )

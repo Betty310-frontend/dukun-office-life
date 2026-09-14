@@ -43,6 +43,7 @@ export interface CompanyState {
 export function AppShell({
   profile,
   npcs,
+  allNpcs,
   companyState,
   dailyEvents,
   messengerLogs,
@@ -56,6 +57,7 @@ export function AppShell({
 }: {
   profile: Profile
   npcs: Npc[]
+  allNpcs: Npc[]
   companyState: CompanyState
   dailyEvents: DailyEventRow[]
   messengerLogs: MessengerLogRow[]
@@ -109,7 +111,7 @@ export function AppShell({
         </div>
       </div>
 
-      {activeTab === 'sim' && <SimPanel me={profile} roster={npcs} companyState={companyState} />}
+      {activeTab === 'sim' && <SimPanel me={profile} roster={npcs} allRoster={allNpcs} companyState={companyState} />}
 
       {activeTab === 'me' && (
         <Card>
