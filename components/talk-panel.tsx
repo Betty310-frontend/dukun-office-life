@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState, useTransition } from 'react'
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -260,6 +260,12 @@ function ConversationThread({
     return [...baseMessages, ...extra]
   }, [baseMessages, liveMessages])
 
+  const messagesBoxRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = messagesBoxRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [messages.length])
+
   useEffect(() => {
     if (!conversationId || selected.type !== 'profile') return
     const supabase = createClient()
@@ -286,6 +292,7 @@ function ConversationThread({
     memory: { text: string } | null
   } | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [draft, setDraft] = useState('')
 
   function handleGenerateChoices() {
     startTransition(async () => {
@@ -323,6 +330,18 @@ function ConversationThread({
     })
   }
 
+  function handleSendDraft() {
+    if (selected.type !== 'profile' || !draft.trim()) return
+    const text = draft
+    setDraft('')
+    startTransition(async () => {
+      const res = await sendConversationMessageAction({ type: 'profile', id: selected.id }, text)
+      if (!res.ok) setErrorMsg(res.message)
+      setChoices(null)
+      router.refresh()
+    })
+  }
+
   return (
     <div className="overflow-hidden rounded-xl border border-border">
       <div className="grid gap-3 p-4">
@@ -339,7 +358,7 @@ function ConversationThread({
           </p>
         )}
 
-        <div className="grid max-h-72 gap-2 overflow-y-auto">
+        <div ref={messagesBoxRef} className="grid max-h-72 gap-2 overflow-y-auto">
           {messages.length === 0 && <p className="text-center text-xs text-muted-foreground">아직 대화가 없어요.</p>}
           {messages.map((m) => {
             const mine = m.sender_type === 'profile' && m.sender_id === me.id
@@ -436,6 +455,20 @@ function ConversationThread({
                       {c.text}
                     </Button>
                   ))}
+                  <div className="flex gap-2">
+                    <Input
+                      value={draft}
+                      onChange={(e) => setDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSendDraft()
+                      }}
+                      placeholder="직접 입력하기"
+                      disabled={isPending}
+                    />
+                    <Button type="button" disabled={isPending || !draft.trim()} onClick={handleSendDraft}>
+                      전송
+                    </Button>
+                  </div>
                 </div>
               )
             ) : (
