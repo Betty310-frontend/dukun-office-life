@@ -491,7 +491,7 @@ function ConversationThread({
                 {isPending ? (
                   <span className="flex items-center gap-2">
                     <span className="inline-block size-3 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                    후보 만드는 중...
+                    메시지 만드는 중...
                   </span>
                 ) : (
                   '메시지 선택하기'

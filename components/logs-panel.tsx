@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { formatDate, seasonName, weekdayNameFromDate } from '@/lib/game/date'
 import type { LogCategory } from '@/lib/game/log-category'
 
@@ -81,13 +80,23 @@ export function LogsPanel({ events }: { events: DailyEventRow[] }) {
             <label htmlFor="log-date-filter" className="text-xs text-muted-foreground">
               날짜 필터
             </label>
-            <Input
-              id="log-date-filter"
-              type="date"
-              value={dateFilter}
-              onChange={(e) => handleDateFilterChange(e.target.value)}
-              className="w-full sm:w-auto"
-            />
+            {/* 네이티브 type=date 인풋은 값이 비어있을 때 모바일 브라우저(특히 iOS Safari)에서
+                아이콘·텍스트 없이 아주 작게 렌더링돼 뭘 누르는 영역인지 알아보기 어렵다. 그래서
+                브라우저 렌더링에 기대지 않고 테두리·배경·달력 아이콘을 우리가 직접 그린 박스 안에
+                네이티브 인풋을 투명하게 겹쳐서, 어떤 브라우저에서도 항상 같은 크기/모양으로 보이게 한다. */}
+            <div className="relative flex h-9 w-full items-center gap-2 rounded-lg border border-input bg-background px-3 sm:w-auto">
+              <span aria-hidden className="shrink-0 text-sm">📅</span>
+              <span className="pointer-events-none text-sm text-foreground">
+                {dateFilter ? formatDate(dateFilter) : '날짜 선택'}
+              </span>
+              <input
+                id="log-date-filter"
+                type="date"
+                value={dateFilter}
+                onChange={(e) => handleDateFilterChange(e.target.value)}
+                className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+              />
+            </div>
           </div>
           <Button type="button" variant="secondary" disabled={!dateFilter} onClick={() => handleDateFilterChange('')}>
             전체 날짜 보기
