@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Toast } from '@/components/toast'
 import { updateNpcAction, toggleNpcActiveAction } from '@/app/actions/npc'
 import { GENDERS, TEAMS, JOB_RANKS, JOB_ROLES, WORK_STYLES, MBTI_TYPES, TRAITS } from '@/lib/validation/profile'
 
@@ -87,77 +88,95 @@ function TraitPicker({ name, label, defaultChecked }: { name: string; label: str
 export function NpcEditor({ npc }: { npc: NpcData }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const [message, setMessage] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
+  const detailsRef = useRef<HTMLDetailsElement>(null)
 
   function handleSave(formData: FormData) {
     startTransition(async () => {
       const result = await updateNpcAction(npc.id, formData)
-      setMessage(result.message)
-      if (result.ok) router.refresh()
+      if (!result.ok) {
+        setErrorMessage(result.message)
+        return
+      }
+      setErrorMessage(null)
+      setToast(result.message)
+      if (detailsRef.current) detailsRef.current.open = false
+      router.refresh()
     })
   }
 
   function handleToggleActive() {
     startTransition(async () => {
       const result = await toggleNpcActiveAction(npc.id)
-      setMessage(result.message)
-      if (result.ok) router.refresh()
+      if (!result.ok) {
+        setErrorMessage(result.message)
+        return
+      }
+      setErrorMessage(null)
+      setToast(result.message)
+      if (detailsRef.current) detailsRef.current.open = false
+      router.refresh()
     })
   }
 
   return (
-    <details className="rounded-xl border border-border">
-      <summary className="cursor-pointer px-3 py-2 text-xs font-semibold text-muted-foreground">직원 정보 수정</summary>
-      <form action={handleSave} className="grid gap-3 border-t border-border p-3">
-        <div className="grid gap-1">
-          <Label htmlFor={`name-${npc.id}`} className="text-[11px] text-muted-foreground">
-            이름
-          </Label>
-          <Input id={`name-${npc.id}`} name="name" defaultValue={npc.name} className="h-8 text-xs" />
-        </div>
+    <>
+      <details ref={detailsRef} className="rounded-xl border border-border">
+        <summary className="cursor-pointer px-3 py-2 text-xs font-semibold text-muted-foreground">직원 정보 수정</summary>
+        <form action={handleSave} className="grid gap-3 border-t border-border p-3">
+          <div className="grid gap-1">
+            <Label htmlFor={`name-${npc.id}`} className="text-[11px] text-muted-foreground">
+              이름
+            </Label>
+            <Input id={`name-${npc.id}`} name="name" defaultValue={npc.name} className="h-8 text-xs" />
+          </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <SelectField id="team" label="팀" options={TEAMS} defaultValue={npc.team} />
-          <SelectField id="rank" label="직급" options={JOB_RANKS} defaultValue={npc.rank} />
-          <SelectField id="role" label="직무" options={JOB_ROLES} defaultValue={npc.role} />
-          <SelectField id="work_style" label="업무 스타일" options={WORK_STYLES} defaultValue={npc.work_style} />
-          <SelectField id="gender" label="성별" options={GENDERS} defaultValue={npc.gender} />
-          <SelectField id="mbti" label="MBTI" options={MBTI_TYPES} defaultValue={npc.mbti} />
-        </div>
+          <div className="grid grid-cols-2 gap-2">
+            <SelectField id="team" label="팀" options={TEAMS} defaultValue={npc.team} />
+            <SelectField id="rank" label="직급" options={JOB_RANKS} defaultValue={npc.rank} />
+            <SelectField id="role" label="직무" options={JOB_ROLES} defaultValue={npc.role} />
+            <SelectField id="work_style" label="업무 스타일" options={WORK_STYLES} defaultValue={npc.work_style} />
+            <SelectField id="gender" label="성별" options={GENDERS} defaultValue={npc.gender} />
+            <SelectField id="mbti" label="MBTI" options={MBTI_TYPES} defaultValue={npc.mbti} />
+          </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          {STAT_FIELDS.map((s) => (
-            <div key={s.key} className="grid gap-1">
-              <Label htmlFor={`${s.key}-${npc.id}`} className="text-[11px] text-muted-foreground">
-                {s.label}
-              </Label>
-              <Input
-                id={`${s.key}-${npc.id}`}
-                name={s.key}
-                type="number"
-                min={0}
-                max={100}
-                defaultValue={npc[s.key]}
-                className="h-8 text-xs"
-              />
-            </div>
-          ))}
-        </div>
+          <div className="grid grid-cols-2 gap-2">
+            {STAT_FIELDS.map((s) => (
+              <div key={s.key} className="grid gap-1">
+                <Label htmlFor={`${s.key}-${npc.id}`} className="text-[11px] text-muted-foreground">
+                  {s.label}
+                </Label>
+                <Input
+                  id={`${s.key}-${npc.id}`}
+                  name={s.key}
+                  type="number"
+                  min={0}
+                  max={100}
+                  defaultValue={npc[s.key]}
+                  className="h-8 text-xs"
+                />
+              </div>
+            ))}
+          </div>
 
-        <TraitPicker name="traits" label="성격 특성" defaultChecked={npc.traits} />
-        <TraitPicker name="pref_traits" label="선호하는 이성 특성" defaultChecked={npc.pref_traits} />
+          <TraitPicker name="traits" label="성격 특성" defaultChecked={npc.traits} />
+          <TraitPicker name="pref_traits" label="선호하는 이성 특성" defaultChecked={npc.pref_traits} />
 
-        {message && <p className="text-[11px] font-semibold text-muted-foreground">{message}</p>}
+          {errorMessage && <p className="text-[11px] font-semibold text-destructive">{errorMessage}</p>}
 
-        <div className="flex gap-2">
-          <Button type="submit" size="sm" disabled={isPending} className="flex-1">
-            저장
-          </Button>
-          <Button type="button" size="sm" variant="destructive" disabled={isPending} onClick={handleToggleActive}>
-            {npc.active ? '퇴사 처리' : '퇴사 취소'}
-          </Button>
-        </div>
-      </form>
-    </details>
+          <div className="flex gap-2">
+            <Button type="submit" size="sm" disabled={isPending} className="flex-1">
+              저장
+            </Button>
+            <Button type="button" size="sm" variant="destructive" disabled={isPending} onClick={handleToggleActive}>
+              {npc.active ? '퇴사 처리' : '퇴사 취소'}
+            </Button>
+          </div>
+        </form>
+      </details>
+
+      {toast && <Toast message={toast} onDismiss={() => setToast(null)} />}
+    </>
   )
 }
