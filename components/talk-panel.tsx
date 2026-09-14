@@ -140,7 +140,7 @@ export function TalkPanel({
         </p>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-[240px_1fr]">
-          <div className="grid gap-2 content-start">
+          <div className={`grid gap-2 content-start ${selected ? 'hidden sm:grid' : ''}`}>
             {people.length > 0 && (
               <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="이름으로 검색" />
             )}
@@ -198,7 +198,7 @@ export function TalkPanel({
           </div>
 
           {!selected ? (
-            <div className="rounded-xl border border-border p-6 text-center text-sm text-muted-foreground">
+            <div className="hidden rounded-xl border border-border p-6 text-center text-sm text-muted-foreground sm:block">
               왼쪽에서 대화할 사람을 선택하세요.
             </div>
           ) : (
@@ -212,6 +212,7 @@ export function TalkPanel({
               relation={selected.type === 'npc' ? (myRelationTo(selected) ?? DEFAULT_RELATION) : undefined}
               talkedToday={selected.type === 'npc' && myRelationTo(selected)?.last_talked_date === companyDate}
               memories={selected.type === 'npc' ? memoriesFor(selected) : []}
+              onBack={() => setSelectedKey(null)}
             />
           )}
         </div>
@@ -229,6 +230,7 @@ function ConversationThread({
   relation,
   talkedToday,
   memories,
+  onBack,
 }: {
   me: { id: string; name: string }
   selected: Person
@@ -238,6 +240,7 @@ function ConversationThread({
   relation: RelationEntry | undefined
   talkedToday: boolean
   memories: TalkMemoryRow[]
+  onBack: () => void
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -347,6 +350,16 @@ function ConversationThread({
   return (
     <div className="overflow-hidden rounded-xl border border-border">
       <div className="grid gap-3 p-4">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center gap-1 text-xs font-semibold text-muted-foreground sm:hidden"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          목록으로
+        </button>
         <div className="flex items-center justify-between">
           <b className="text-sm">{selected.name}</b>
           {selected.type === 'npc' && relation && (
