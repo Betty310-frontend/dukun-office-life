@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toWorkforceMember } from '@/lib/game/workforce'
 import type { TalkMemoryRow } from '@/components/talk-panel'
@@ -32,6 +33,8 @@ export interface RelationRow {
 
 type SortKey = 'overall' | 'affection' | 'trust' | 'conflict' | 'romantic'
 
+const PAGE_SIZE = 10
+
 const SORT_OPTIONS: { id: SortKey; label: string }[] = [
   { id: 'overall', label: '종합' },
   { id: 'affection', label: '호감도' },
@@ -53,6 +56,17 @@ export function RelationshipsPanel({
 }) {
   const [query, setQuery] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('overall')
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+
+  function handleQueryChange(next: string) {
+    setQuery(next)
+    setVisibleCount(PAGE_SIZE)
+  }
+
+  function handleSortChange(next: SortKey) {
+    setSortKey(next)
+    setVisibleCount(PAGE_SIZE)
+  }
 
   const workforce: WorkforceMember[] = useMemo(
     () => [...profiles.map((p) => toWorkforceMember('profile', p)), ...npcs.map((n) => toWorkforceMember('npc', n))],
@@ -122,13 +136,13 @@ export function RelationshipsPanel({
         <div className="mt-4 flex flex-wrap items-center gap-2.5 rounded-xl border border-border bg-accent/60 p-3">
           <Input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => handleQueryChange(e.target.value)}
             placeholder="이름으로 검색 (예: 지연)"
             className="min-w-[160px] flex-1"
           />
           <select
             value={sortKey}
-            onChange={(e) => setSortKey(e.target.value as SortKey)}
+            onChange={(e) => handleSortChange(e.target.value as SortKey)}
             className="h-9 rounded-md border border-input bg-background px-3 text-sm"
           >
             {SORT_OPTIONS.map((opt) => (
@@ -156,7 +170,7 @@ export function RelationshipsPanel({
           </div>
         ) : (
           <div className="mt-3 divide-y divide-border overflow-hidden rounded-xl border border-border">
-            {pairs.map(({ a, b, overall }) => {
+            {pairs.slice(0, visibleCount).map(({ a, b, overall }) => {
               const ab = ensureRelation(relations, a, b)
               const ba = ensureRelation(relations, b, a)
               const opposite = isOppositeGender(a, b)
@@ -209,6 +223,17 @@ export function RelationshipsPanel({
               )
             })}
           </div>
+        )}
+
+        {pairs.length > visibleCount && (
+          <Button
+            type="button"
+            variant="secondary"
+            className="mt-3 w-full"
+            onClick={() => setVisibleCount((v) => v + PAGE_SIZE)}
+          >
+            더 보기 (남은 {pairs.length - visibleCount}건)
+          </Button>
         )}
       </CardContent>
     </Card>

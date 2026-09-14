@@ -37,9 +37,22 @@ function cleanLogText(text: string, isProtagonist: boolean): string {
   return isProtagonist ? text.replace(/^\[주인공[^\]]*\]\s*/, '') : text
 }
 
+const PAGE_SIZE = 5
+
 export function LogsPanel({ events }: { events: DailyEventRow[] }) {
   const [category, setCategory] = useState<'all' | LogCategory>('all')
   const [dateFilter, setDateFilter] = useState('')
+  const [visibleDays, setVisibleDays] = useState(PAGE_SIZE)
+
+  function handleCategoryChange(next: 'all' | LogCategory) {
+    setCategory(next)
+    setVisibleDays(PAGE_SIZE)
+  }
+
+  function handleDateFilterChange(next: string) {
+    setDateFilter(next)
+    setVisibleDays(PAGE_SIZE)
+  }
 
   const days = useMemo(() => {
     const byDate = new Map<string, DailyEventRow[]>()
@@ -72,11 +85,11 @@ export function LogsPanel({ events }: { events: DailyEventRow[] }) {
               id="log-date-filter"
               type="date"
               value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
+              onChange={(e) => handleDateFilterChange(e.target.value)}
               className="w-full sm:w-auto"
             />
           </div>
-          <Button type="button" variant="secondary" disabled={!dateFilter} onClick={() => setDateFilter('')}>
+          <Button type="button" variant="secondary" disabled={!dateFilter} onClick={() => handleDateFilterChange('')}>
             전체 날짜 보기
           </Button>
         </div>
@@ -87,7 +100,7 @@ export function LogsPanel({ events }: { events: DailyEventRow[] }) {
               key={f.id}
               type="button"
               aria-pressed={category === f.id}
-              onClick={() => setCategory(f.id)}
+              onClick={() => handleCategoryChange(f.id)}
               className={`rounded-full border px-3 py-1.5 text-xs font-bold transition-colors ${
                 category === f.id
                   ? 'border-transparent bg-[image:linear-gradient(135deg,var(--primary),color-mix(in_oklch,var(--primary),black_12%))] text-primary-foreground'
@@ -106,7 +119,7 @@ export function LogsPanel({ events }: { events: DailyEventRow[] }) {
               {dateFilter && ` · ${formatDate(dateFilter)}`} · 데이터 없음]
             </div>
           )}
-          {days.map(([date, dayEvents]) => (
+          {days.slice(0, visibleDays).map(([date, dayEvents]) => (
             <div
               key={date}
               className="rounded-2xl border border-[#eadde3] bg-card p-4 shadow-[0_2px_8px_rgba(50,30,40,.035)]"
@@ -148,6 +161,17 @@ export function LogsPanel({ events }: { events: DailyEventRow[] }) {
             </div>
           ))}
         </div>
+
+        {days.length > visibleDays && (
+          <Button
+            type="button"
+            variant="secondary"
+            className="mt-3 w-full"
+            onClick={() => setVisibleDays((v) => v + PAGE_SIZE)}
+          >
+            더 보기 (남은 {days.length - visibleDays}일)
+          </Button>
+        )}
       </CardContent>
     </Card>
   )
