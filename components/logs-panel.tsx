@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { formatDate, seasonName, weekdayNameFromDate } from '@/lib/game/date'
 import type { LogCategory } from '@/lib/game/log-category'
 
@@ -37,17 +39,19 @@ function cleanLogText(text: string, isProtagonist: boolean): string {
 
 export function LogsPanel({ events }: { events: DailyEventRow[] }) {
   const [category, setCategory] = useState<'all' | LogCategory>('all')
+  const [dateFilter, setDateFilter] = useState('')
 
   const days = useMemo(() => {
     const byDate = new Map<string, DailyEventRow[]>()
     for (const ev of events) {
       if (category !== 'all' && ev.category !== category) continue
+      if (dateFilter && ev.date !== dateFilter) continue
       const bucket = byDate.get(ev.date)
       if (bucket) bucket.push(ev)
       else byDate.set(ev.date, [ev])
     }
     return Array.from(byDate.entries()).sort((a, b) => b[0].localeCompare(a[0]))
-  }, [events, category])
+  }, [events, category, dateFilter])
 
   const emptyLabel = CATEGORY_FILTERS.find((f) => f.id === category)?.label ?? '전체'
 
@@ -59,7 +63,25 @@ export function LogsPanel({ events }: { events: DailyEventRow[] }) {
           시뮬레이션 진행 중 발생한 하루 단위 이벤트를 날짜별로 조회합니다.
         </p>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap items-end gap-3">
+          <div className="grid gap-1">
+            <label htmlFor="log-date-filter" className="text-xs text-muted-foreground">
+              날짜 필터
+            </label>
+            <Input
+              id="log-date-filter"
+              type="date"
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="w-auto"
+            />
+          </div>
+          <Button type="button" variant="secondary" disabled={!dateFilter} onClick={() => setDateFilter('')}>
+            전체 날짜 보기
+          </Button>
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-2">
           {CATEGORY_FILTERS.map((f) => (
             <button
               key={f.id}
@@ -80,7 +102,8 @@ export function LogsPanel({ events }: { events: DailyEventRow[] }) {
         <div className="mt-4 grid gap-3">
           {days.length === 0 && (
             <div className="rounded-2xl border border-dashed border-[#e5d5dc] bg-[#fffafb] p-10 text-center text-sm font-bold text-[#a18490]">
-              [{emptyLabel} · 데이터 없음]
+              [{emptyLabel}
+              {dateFilter && ` · ${formatDate(dateFilter)}`} · 데이터 없음]
             </div>
           )}
           {days.map(([date, dayEvents]) => (
