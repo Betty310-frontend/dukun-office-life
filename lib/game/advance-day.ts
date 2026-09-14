@@ -2,7 +2,7 @@
 // DOM/alert/localStorage/렌더링 호출은 전부 제거하고, 명시적 입력(스냅샷)을 받아 명시적 결과(diff)를 반환한다.
 // getPerson/$(...).value 같은 DOM 읽기는 input.lead/seller/fire/salesMode/overtimeMode로 대체했다.
 // alert(...)/openMeTab()(원본 5606-5611행, 미설정 주인공 경고)은 호출부(서버 액션)의 책임이므로 없다.
-import { clamp, fmt } from './format'
+import { clamp, fmt, josa } from './format'
 import {
   formatDate,
   isFridayDate,
@@ -181,7 +181,7 @@ export function advanceDay(input: AdvanceDayInput): AdvanceDayResult {
     for (const me of protagonists) {
       if (Math.random() < 0.82) {
         const roleText = ROLE_TEXT[me.role] || '팀 업무를 도왔다.'
-        protagonistEvents.push(`[주인공 업무] ${me.name}은(는) ${roleText}`)
+        protagonistEvents.push(`[주인공 업무] ${me.name}${josa(me.name, '은', '는')} ${roleText}`)
       }
     }
 

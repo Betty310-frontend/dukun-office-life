@@ -3,7 +3,7 @@
 // 이 로직을 1회씩 돌린다 (호출부는 Task 6 advanceDay) — Global Constraints 참고.
 // protagonistMemories.unshift(...)는 "대화하기"(별도 플랜) 범위이므로 여기서는 저장하지 않고
 // 결과의 `memory` 필드로만 얹어 넘긴다.
-import { clamp, pick } from './format'
+import { clamp, josa, pick } from './format'
 import { hasTrait, mbtiCompatibility, traitPairScore } from './compatibility'
 import { ensureRelation, isOppositeGender, type ActorRef, type RelationsMap } from './relations'
 import type { WorkforceMember } from './types'
@@ -88,7 +88,7 @@ export function workInteractionText(me: WorkforceMember, emp: WorkforceMember, p
         ])
       : pick([
           `${meName}과(와) ${emp.name}이(가) 성과 하락 원인을 서로 다르게 봤다. 랜딩 문제인지 타깃 문제인지 데이터를 더 확인하기로 했다.`,
-          `${meName}이(가) 빠른 예산 조정을 제안했지만 ${emp.name}은(는) 데이터가 더 필요하다고 봤다. 둘은 테스트 기간을 다시 합의했다.`,
+          `${meName}이(가) 빠른 예산 조정을 제안했지만 ${emp.name}${josa(emp.name, '은', '는')} 데이터가 더 필요하다고 봤다. 둘은 테스트 기간을 다시 합의했다.`,
         ]),
     '디자인|웹페이지 코딩·제작': positive
       ? `${meName}과(와) ${emp.name}이(가) 시안과 실제 랜딩 화면을 함께 비교했다. 모바일에서 어색한 부분을 바로 잡아 구현 방향을 맞췄다.`
@@ -109,13 +109,13 @@ export function workInteractionText(me: WorkforceMember, emp: WorkforceMember, p
     `${meName}과(와) 같은 ${me.team}의 ${emp.name}이(가) 오전 업무 우선순위를 같이 확인했다. 서로 맡은 부분을 정리하니 일정이 한결 명확해졌다.`,
     `${emp.name}이(가) 처리 중인 업무를 ${meName}에게 공유했다. ${meName}이(가) 빠진 부분을 보완해주면서 일이 매끄럽게 이어졌다.`,
     `${meName}과(와) ${emp.name}이(가) 광고주 요청 건을 같이 검토했다. 필요한 수정만 추려서 각자 나눠 처리하기로 했다.`,
-    `${meName}이(가) 바쁜 ${emp.name}의 업무 일부를 나눠 맡았다. ${emp.name}은(는) 덕분에 마감 시간을 맞출 수 있었다.`,
+    `${meName}이(가) 바쁜 ${emp.name}의 업무 일부를 나눠 맡았다. ${emp.name}${josa(emp.name, '은', '는')} 덕분에 마감 시간을 맞출 수 있었다.`,
     `${meName}과(와) ${emp.name}이(가) 오늘 처리한 업무를 서로 확인했다. 작은 실수를 바로 잡으면서 최종 전달을 마쳤다.`,
   ]
   const negativeSameTeam = [
     `${meName}과(와) 같은 ${me.team}의 ${emp.name}이(가) 업무 방식 차이로 잠시 부딪혔다. 일정과 역할을 다시 정리했다.`,
     `${meName}과(와) ${emp.name} 사이에서 업무 공유 시점이 어긋났다. 이미 처리한 내용을 다시 확인하느라 시간이 조금 더 들었다.`,
-    `${meName}이(가) 빠른 처리를 원했지만 ${emp.name}은(는) 검수를 더 해야 한다고 봤다. 둘은 마감 기준을 다시 맞췄다.`,
+    `${meName}이(가) 빠른 처리를 원했지만 ${emp.name}${josa(emp.name, '은', '는')} 검수를 더 해야 한다고 봤다. 둘은 마감 기준을 다시 맞췄다.`,
   ]
   const positiveOther = [
     `${meName}이(가) ${emp.team}의 ${emp.name}에게 업무 협조를 요청했다. 필요한 자료를 빠르게 주고받아 요청 건을 바로 마무리했다.`,
@@ -146,8 +146,8 @@ export function socialInteractionText(map: RelationsMap, me: WorkforceMember, em
     }
     if (stress >= 70) {
       return pick([
-        `${meName}이(가) 지쳐 보이는 ${emp.name}에게 괜찮냐고 물었다. ${emp.name}은(는) 요즘 광고주 대응이 조금 버겁다고 털어놨다.`,
-        `${emp.name}이(가) 잠깐 쉬면서 ${meName}에게 최근 업무가 많이 몰렸다고 말했다. ${meName}은(는) 필요한 일이 있으면 나눠달라고 했다.`,
+        `${meName}이(가) 지쳐 보이는 ${emp.name}에게 괜찮냐고 물었다. ${emp.name}${josa(emp.name, '은', '는')} 요즘 광고주 대응이 조금 버겁다고 털어놨다.`,
+        `${emp.name}이(가) 잠깐 쉬면서 ${meName}에게 최근 업무가 많이 몰렸다고 말했다. ${meName}${josa(meName, '은', '는')} 필요한 일이 있으면 나눠달라고 했다.`,
       ])
     }
     if (hasTrait(me, '친화적') || hasTrait(emp, '친화적')) {
@@ -165,7 +165,7 @@ export function socialInteractionText(map: RelationsMap, me: WorkforceMember, em
   }
   return pick([
     `${meName}과(와) ${emp.name}이(가) 짧게 대화를 나눴지만 서로 컨디션이 좋지 않아 분위기가 다소 딱딱했다.`,
-    `${meName}이(가) ${emp.name}에게 말을 걸었지만 ${emp.name}은(는) 마감 때문에 여유가 없었다. 둘은 필요한 얘기만 짧게 나눴다.`,
+    `${meName}이(가) ${emp.name}에게 말을 걸었지만 ${emp.name}${josa(emp.name, '은', '는')} 마감 때문에 여유가 없었다. 둘은 필요한 얘기만 짧게 나눴다.`,
     `${meName}과(와) ${emp.name}이(가) 업무 중 잠깐 의견을 주고받았지만 서로 피곤해 대화가 조금 건조하게 끝났다.`,
   ])
 }
