@@ -156,7 +156,7 @@ export function AppShell({
         />
       )}
       {activeTab === 'relationships' && (
-        <RelationshipsPanel profiles={profiles} npcs={npcs} relationships={relationships} />
+        <RelationshipsPanel profiles={profiles} npcs={npcs} relationships={relationships} talkMemories={talkMemories} />
       )}
       {activeTab === 'resetdata' && <ResetDataPanel />}
 

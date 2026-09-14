@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { toWorkforceMember } from '@/lib/game/workforce'
+import type { TalkMemoryRow } from '@/components/talk-panel'
 import {
   ensureRelation,
   isOppositeGender,
@@ -43,10 +44,12 @@ export function RelationshipsPanel({
   profiles,
   npcs,
   relationships,
+  talkMemories,
 }: {
   profiles: Record<string, unknown>[]
   npcs: Record<string, unknown>[]
   relationships: RelationRow[]
+  talkMemories: TalkMemoryRow[]
 }) {
   const [query, setQuery] = useState('')
   const [sortKey, setSortKey] = useState<SortKey>('overall')
@@ -70,6 +73,18 @@ export function RelationshipsPanel({
   }, [relationships])
 
   const trimmedQuery = query.trim().toLocaleLowerCase('ko-KR')
+
+  // 추억(talk_memories)은 항상 actor_type: 'profile', target_type: 'npc'로 쌓인다(대화하기 탭에서 NPC와
+  // 대화할 때만 생성됨) — 어느 쪽이 profile/npc인지 몰라도 양방향으로 찾아서 붙인다.
+  function memoriesFor(a: WorkforceMember, b: WorkforceMember) {
+    return talkMemories
+      .filter(
+        (m) =>
+          (m.actor_type === a.type && m.actor_id === a.id && m.target_type === b.type && m.target_id === b.id) ||
+          (m.actor_type === b.type && m.actor_id === b.id && m.target_type === a.type && m.target_id === a.id)
+      )
+      .slice(0, 3)
+  }
 
   const pairs = useMemo(() => {
     const list: { a: WorkforceMember; b: WorkforceMember; overall: number }[] = []
@@ -145,6 +160,7 @@ export function RelationshipsPanel({
               const ab = ensureRelation(relations, a, b)
               const ba = ensureRelation(relations, b, a)
               const opposite = isOppositeGender(a, b)
+              const memories = memoriesFor(a, b)
               return (
                 <div key={`${a.type}:${a.id}-${b.type}:${b.id}`} className="bg-card px-3 py-2.5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -174,6 +190,20 @@ export function RelationshipsPanel({
                     <p className="mt-1 text-[10px] text-muted-foreground">
                       선호 일치 {a.name}→{Math.round(preferenceMatch(a, b) * 100)}% · {b.name}→{Math.round(preferenceMatch(b, a) * 100)}%
                     </p>
+                  )}
+                  {memories.length > 0 && (
+                    <details className="mt-1.5">
+                      <summary className="cursor-pointer text-[11px] font-bold text-[#a45775]">
+                        💗 둘만의 추억 {memories.length}개
+                      </summary>
+                      <div className="mt-1 grid gap-1 rounded-lg border border-[#efc4d4] bg-[linear-gradient(180deg,#fffafd_0%,#fff6fa_100%)] p-2">
+                        {memories.map((m, i) => (
+                          <p key={i} className="text-[11px] text-[#7d6570]">
+                            {m.text}
+                          </p>
+                        ))}
+                      </div>
+                    </details>
                   )}
                 </div>
               )
