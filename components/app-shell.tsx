@@ -15,6 +15,7 @@ import {
 } from '@/components/talk-panel'
 import { RelationshipsPanel, type RelationRow } from '@/components/relationships-panel'
 import { ResetDataPanel } from '@/components/reset-data-panel'
+import { ScrollToTopButton } from '@/components/scroll-to-top-button'
 import { saveProfile } from '@/app/onboarding/actions'
 import type { ProfileInput } from '@/lib/validation/profile'
 import { TABS, type TabId } from '@/lib/tabs'
@@ -158,6 +159,8 @@ export function AppShell({
         <RelationshipsPanel profiles={profiles} npcs={npcs} relationships={relationships} />
       )}
       {activeTab === 'resetdata' && <ResetDataPanel />}
+
+      <ScrollToTopButton />
     </div>
   )
 }
