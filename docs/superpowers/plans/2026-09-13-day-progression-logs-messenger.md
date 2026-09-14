@@ -656,27 +656,33 @@ git commit -m "Add daily log tab reading from daily_events"
 - Consumes: `messenger_logs` 테이블, `lib/game/messenger.ts`(Task 4)의 `generateMessengerScene`
 - Produces: 메신저 탭에서 날짜별 대화 열람 + "랜덤 상황 대화 만들기"(3일 쿨다운) 수동 트리거.
 
-- [ ] **Step 1: 서버에서 메신저 로그 조회**
+- [x] **Step 1: 서버에서 메신저 로그 조회**
 
 `messenger_logs`를 `date desc`로 조회.
 
-- [ ] **Step 2: `MessengerPanel` 컴포넌트**
+- [x] **Step 2: `MessengerPanel` 컴포넌트**
 
 원본의 `messenger-grid`(좌측 날짜 리스트 + 우측 채팅창) 레이아웃을 이식. 날짜 클릭 시 그 날의 씬들을 채팅 버블(`speaker`별 좌/우 정렬, 원본 `.bubble`/`.bubble.me` 스타일 참고)로 표시. 모바일에서는 1열로 스택.
 
-- [ ] **Step 3: 수동 매칭 서버 액션**
+메신저 씬은 `daily_events`와 달리 `is_configured`인 임의의 두 프로필(다른 실유저 포함) 사이에서 생성될 수 있다. `app/page.tsx`가 원래 로드하던 건 본인 프로필뿐이라 참가자 이름이 "알 수 없음"으로 뜨는 버그가 나서, `profiles`에서 `id,name`만 추가로 조회해 이름 조회용으로 `MessengerPanel`에 넘기도록 고쳤다(수동 매칭 select는 기존 SimPanel 담당자 배정과 동일하게 본인+NPC로만 범위를 유지함).
+
+- [x] **Step 3: 수동 매칭 서버 액션**
 
 `app/actions/manual-chat.ts`: `company_state.last_manual_chat_day`와 `company_state.day`를 비교해 3일 쿨다운 체크(원본 2640행 `canManualChat` 그대로: `day - lastManualChatDay >= 3`), 통과하면 두 workforce 멤버를 받아 `generateMessengerScene(a, b, today, true)` 호출 후 `messenger_logs`에 insert, `company_state.last_manual_chat_day = day` 갱신.
 
-- [ ] **Step 4: `app-shell.tsx`의 메신저 스텁을 `MessengerPanel`로 교체**
+`advanceDayAction`에 있던 `toWorkforceMember`를 `lib/game/workforce.ts`로 뽑아서 두 서버 액션이 같이 씀(별도 리팩터 커밋으로 분리).
+
+- [x] **Step 4: `app-shell.tsx`의 메신저 스텁을 `MessengerPanel`로 교체**
 
 두 직원 선택 select + "랜덤 상황 대화 만들기" 버튼(쿨다운 안내 텍스트 포함, 원본 1236-1243행 참고) 포함.
 
-- [ ] **Step 5: 브라우저로 확인**
+- [x] **Step 5: 브라우저로 확인**
 
 하루 진행 후 메신저 탭에서 자동 생성된 씬이 보이는지, 수동 매칭이 쿨다운 규칙대로 동작하는지(3일 이내 재시도 시 버튼 비활성/안내 문구) 확인.
 
-- [ ] **Step 6: Commit**
+브라우저 검증 중 실제로 수동 매칭 1회를 실행했다 — `company_state.last_manual_chat_day`가 -999에서 2로, `messenger_logs`에 테스트 씬 1건이 생겼다(테스트주인공↔김팀장, CTR 하락). `messenger_logs`엔 authenticated용 delete/update 정책이 없어서 이 세션에서 되돌리지 못했다 — sim-test-8 계정 잔여물과 같은 종류의 잔존 테스트 데이터로 남아있음(데이터 초기화 탭이 아직 스텁이라 UI로도 못 지움).
+
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
