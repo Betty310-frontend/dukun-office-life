@@ -76,6 +76,7 @@ export function AppShell({
   function selectTab(tab: TabId) {
     setActiveTab(tab)
     router.replace(`/?tab=${tab}`, { scroll: false })
+    window.scrollTo({ top: 0, behavior: 'instant' })
   }
 
   return (
