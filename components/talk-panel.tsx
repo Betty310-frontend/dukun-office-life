@@ -257,7 +257,9 @@ function ConversationThread({
   const [liveMessages, setLiveMessages] = useState<ConversationMessageRow[]>([])
   const messages = useMemo(() => {
     const extra = liveMessages.filter((m) => !baseMessages.some((b) => b.id === m.id))
-    return [...baseMessages, ...extra]
+    // 실시간 구독으로 붙는 메시지는 baseMessages(서버에서 이미 시간순 정렬됨) 뒤에 그냥
+    // 이어붙이면 도착 순서에 따라 실제 대화 순서와 어긋날 수 있어 created_at으로 다시 정렬한다.
+    return [...baseMessages, ...extra].sort((a, b) => a.created_at.localeCompare(b.created_at))
   }, [baseMessages, liveMessages])
 
   const messagesBoxRef = useRef<HTMLDivElement>(null)

@@ -190,21 +190,34 @@ export async function sendNpcTalkAction(
 
   const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
 
-  const [, , relationResult, memoryResult] = await Promise.all([
-    supabase.from('conversation_messages').insert({
-      conversation_id: conversationId,
-      sender_type: 'profile',
-      sender_id: talker.id,
-      text: choice.text,
-      meta: { group: choice.group, kind: choice.kind, topic: choice.topic },
-    }),
-    supabase.from('conversation_messages').insert({
-      conversation_id: conversationId,
-      sender_type: 'npc',
-      sender_id: npc.id,
-      text: reply,
-      meta: {},
-    }),
+  // 두 메시지는 created_at 기준으로 화면에 정렬되므로, Promise.all로 동시에 넣으면
+  // 네트워크 타이밍에 따라 reply가 choice보다 먼저 저장돼 순서가 뒤바뀔 수 있다.
+  // 반드시 choice(내 말) 먼저, reply(NPC 답변) 다음 순서로 순차 삽입한다.
+  const choiceInsert = await supabase.from('conversation_messages').insert({
+    conversation_id: conversationId,
+    sender_type: 'profile',
+    sender_id: talker.id,
+    text: choice.text,
+    meta: { group: choice.group, kind: choice.kind, topic: choice.topic },
+  })
+  if (choiceInsert.error) {
+    console.error('[talk] sendNpcTalkAction failed to insert choice message:', choiceInsert.error.message)
+    return { ok: false, message: '대화 반영에 실패했습니다.' }
+  }
+
+  const replyInsert = await supabase.from('conversation_messages').insert({
+    conversation_id: conversationId,
+    sender_type: 'npc',
+    sender_id: npc.id,
+    text: reply,
+    meta: {},
+  })
+  if (replyInsert.error) {
+    console.error('[talk] sendNpcTalkAction failed to insert reply message:', replyInsert.error.message)
+    return { ok: false, message: '대화 반영에 실패했습니다.' }
+  }
+
+  const [relationResult, memoryResult] = await Promise.all([
     supabase.from('relationships').upsert(
       {
         actor_type: talkerRef.type,
