@@ -18,6 +18,7 @@ import { ResetDataPanel } from '@/components/reset-data-panel'
 import { saveProfile } from '@/app/onboarding/actions'
 import type { ProfileInput } from '@/lib/validation/profile'
 import { TABS, type TabId } from '@/lib/tabs'
+import { formatDate, seasonName, weekdayNameFromDate } from '@/lib/game/date'
 
 type Profile = ProfileInput & { id: string }
 type Npc = ProfileInput & { id: number; active: boolean }
@@ -76,27 +77,36 @@ export function AppShell({
 
   return (
     <div className="mx-auto max-w-3xl p-4 sm:p-6">
-      <div
-        role="tablist"
-        aria-label="시뮬레이터 탭"
-        className="sticky top-2 z-10 mb-4 flex flex-wrap gap-2 rounded-2xl border border-border bg-card/80 p-2 backdrop-blur"
-      >
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            role="tab"
-            aria-selected={activeTab === tab.id}
-            onClick={() => selectTab(tab.id)}
-            className={`rounded-xl border px-3 py-2 text-xs font-bold whitespace-nowrap transition-all sm:text-sm ${
-              activeTab === tab.id
-                ? 'border-transparent bg-[image:linear-gradient(135deg,var(--primary),color-mix(in_oklch,var(--primary),black_12%))] text-primary-foreground shadow-sm shadow-primary/25'
-                : 'border-border bg-background text-muted-foreground hover:bg-accent'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="sticky top-2 z-10 mb-4 overflow-hidden rounded-2xl border border-border bg-card/80 backdrop-blur">
+        <div
+          className="flex items-center justify-between gap-2 px-3 py-2 text-primary-foreground"
+          style={{ background: 'linear-gradient(135deg,var(--primary),color-mix(in oklch,var(--primary),black 12%))' }}
+        >
+          <span className="truncate text-sm font-bold">
+            🗓️ {formatDate(companyState.date)} · {weekdayNameFromDate(companyState.date)} · {seasonName(companyState.date)}
+          </span>
+          <span className="shrink-0 rounded-full bg-white/20 px-2.5 py-1 text-xs font-bold whitespace-nowrap">
+            {companyState.day}일차
+          </span>
+        </div>
+        <div role="tablist" aria-label="시뮬레이터 탭" className="flex flex-wrap gap-2 p-2">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              onClick={() => selectTab(tab.id)}
+              className={`rounded-xl border px-3 py-2 text-xs font-bold whitespace-nowrap transition-all sm:text-sm ${
+                activeTab === tab.id
+                  ? 'border-transparent bg-[image:linear-gradient(135deg,var(--primary),color-mix(in_oklch,var(--primary),black_12%))] text-primary-foreground shadow-sm shadow-primary/25'
+                  : 'border-border bg-background text-muted-foreground hover:bg-accent'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {activeTab === 'sim' && <SimPanel me={profile} roster={npcs} companyState={companyState} />}
