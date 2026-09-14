@@ -67,8 +67,23 @@ function relationLine(relation: RelationEntry): string {
   return `호감도 ${Math.round(relation.affection)}/100, 신뢰도 ${Math.round(relation.trust)}/100, 갈등도 ${Math.round(relation.conflict)}/100`
 }
 
-function npcProfileLine(npc: WorkforceMember): string {
-  return `이름 ${npc.name}, 팀 ${npc.team}, 직급 ${npc.rank}, 직무 ${npc.role}, MBTI ${npc.mbti}, 업무스타일 ${npc.workStyle}, 성격특성 ${npc.traits.join(', ') || '없음'}, 스트레스 ${npc.stress}/100`
+// 대사가 그 캐릭터답게 나오도록 WorkforceMember가 가진 정보를 전부 프롬프트에 담는다.
+function characterProfileLine(p: WorkforceMember): string {
+  return [
+    `이름 ${p.name}`,
+    `성별 ${p.gender}`,
+    `팀 ${p.team}`,
+    `직급 ${p.rank}`,
+    `직무 ${p.role}`,
+    `MBTI ${p.mbti}`,
+    `업무스타일 ${p.workStyle}`,
+    `성격특성 ${p.traits.join(', ') || '없음'}`,
+    `선호특성(끌리는 상대 성향) ${p.prefTraits.join(', ') || '없음'}`,
+    `실무 ${p.skill}/100`,
+    `영업 ${p.sales}/100`,
+    `위기대응 ${p.crisis}/100`,
+    `스트레스 ${p.stress}/100`,
+  ].join(', ')
 }
 
 export async function generateTalkChoices(
@@ -79,7 +94,8 @@ export async function generateTalkChoices(
   const system = '당신은 한국 광고대행사를 배경으로 한 회사생활 시뮬레이션 게임의 대화 생성기입니다. 반드시 JSON만 출력하세요.'
   const user = `${talker.name}이(가) 동료 ${npc.name}에게 말을 걸려고 합니다.
 
-NPC 정보: ${npcProfileLine(npc)}
+말을 거는 사람(${talker.name}) 정보: ${characterProfileLine(talker)}
+상대방(${npc.name}) 정보: ${characterProfileLine(npc)}
 현재 관계(${talker.name}→${npc.name}): ${relationLine(relation)}
 
 ${talker.name}이(가) ${npc.name}에게 건넬 수 있는 대화 시작 문장을 정확히 3개 만들어주세요. 반드시 업무/관계/일상 카테고리(group)에서 각각 정확히 1개씩이어야 합니다.
@@ -88,7 +104,7 @@ ${talker.name}이(가) ${npc.name}에게 건넬 수 있는 대화 시작 문장�
 - 일상: 점심/커피/취미 같은 사적인 가벼운 대화
 
 각 선택지마다 kind(대화 성격, 다음 중 하나: ${KIND_VALUES.join(', ')})와 topic(다음 중 하나: work, praise, casual, worry, hobby)도 정해주세요.
-text는 ${talker.name}이(가) ${npc.name}에게 직접 건네는 1인칭 발화문(직장 동료 사이 존댓말, 한 문장)으로 작성하세요. NPC의 성격과 현재 관계를 고려해서 자연스럽게 만들어주세요.
+text는 ${talker.name}이(가) ${npc.name}에게 직접 건네는 1인칭 발화문(직장 동료 사이 존댓말, 한 문장)으로 작성하세요. 두 사람의 성격·업무스타일·직급 차이와 현재 관계를 모두 반영해서, ${talker.name}이(가) ${npc.name}에게 실제로 할 법한 자연스러운 말투로 만들어주세요.
 
 다음 JSON 형식으로만 답하세요: {"choices":[{"group":"...","kind":"...","topic":"...","text":"..."}, ...]} (정확히 3개, group은 각각 업무/관계/일상 하나씩)`
 
@@ -114,11 +130,12 @@ export async function generateNpcReply(
   choice: TalkChoice
 ): Promise<string | null> {
   const system = `당신은 회사생활 시뮬레이션 게임 속 캐릭터 '${npc.name}'을(를) 연기하는 역할극 배우입니다. 반드시 JSON만 출력하세요.`
-  const user = `당신의 캐릭터 정보: ${npcProfileLine(npc)}
+  const user = `당신의 캐릭터 정보: ${characterProfileLine(npc)}
+말을 건 사람(${talker.name}) 정보: ${characterProfileLine(talker)}
 방금 동료 ${talker.name}이(가) 당신에게 이렇게 말했습니다: "${choice.text}" (대화 성격: ${choice.group}/${choice.kind})
 현재 관계(${talker.name}→당신): ${relationLine(relation)}
 
-이 캐릭터의 성격과 현재 관계에 맞게 1~2문장으로 자연스럽게 답변하세요. 직장 동료 사이 존댓말을 쓰고 과도하게 길게 말하지 마세요.
+당신 캐릭터의 성격·MBTI·업무스타일·직급·스트레스 상태와 상대와의 관계를 전부 반영해서, 이 캐릭터라면 실제로 할 법한 말투로 1~2문장 답변하세요. 직장 동료 사이 존댓말을 쓰고 과도하게 길게 말하지 마세요.
 
 다음 JSON 형식으로만 답하세요: {"reply":"..."}`
 
