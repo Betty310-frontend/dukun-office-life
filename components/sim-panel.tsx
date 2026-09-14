@@ -5,13 +5,24 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { RosterCard } from '@/components/roster-card'
-import { ComingSoonBadge } from '@/components/coming-soon-badge'
 import { advanceDayAction } from '@/app/actions/advance-day'
-import { assignRole } from '@/app/actions/company-state'
+import { assignRole, setOvertimeMode, setSalesMode } from '@/app/actions/company-state'
 import { fmt } from '@/lib/game/format'
 import { formatDate, seasonName, weekdayNameFromDate } from '@/lib/game/date'
 import type { CompanyState } from '@/components/app-shell'
 import type { ActorType } from '@/lib/game/relations'
+import type { OvertimeMode, SalesMode } from '@/lib/game/advance-day'
+
+const SALES_MODES: { value: SalesMode; label: string }[] = [
+  { value: 'safe', label: '보수적 수주' },
+  { value: 'balanced', label: '균형 수주' },
+  { value: 'aggressive', label: '공격적 수주' },
+]
+const OVERTIME_MODES: { value: OvertimeMode; label: string }[] = [
+  { value: 'none', label: '야근 최소화' },
+  { value: 'normal', label: '필요 시 야근' },
+  { value: 'hard', label: '성과 우선' },
+]
 
 interface Person {
   type: ActorType
@@ -59,6 +70,20 @@ export function SimPanel({
     const [type, id] = value.split(':') as [ActorType, string]
     startTransition(async () => {
       await assignRole(role, type, id)
+      router.refresh()
+    })
+  }
+
+  function handleSalesMode(value: string) {
+    startTransition(async () => {
+      await setSalesMode(value as SalesMode)
+      router.refresh()
+    })
+  }
+
+  function handleOvertimeMode(value: string) {
+    startTransition(async () => {
+      await setOvertimeMode(value as OvertimeMode)
       router.refresh()
     })
   }
@@ -155,21 +180,36 @@ export function SimPanel({
 
         <Card>
           <CardContent>
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <h2 className="text-base font-bold">🎯 운영 전략</h2>
-              <ComingSoonBadge />
-            </div>
+            <h2 className="text-base font-bold">🎯 운영 전략</h2>
             <div className="mt-4 grid gap-3">
               <div className="grid gap-1.5">
                 <label className="text-xs text-muted-foreground">수주 강도</label>
-                <select disabled className="h-9 cursor-not-allowed rounded-md border border-input bg-background px-3 text-sm opacity-60">
-                  <option>균형 수주</option>
+                <select
+                  value={companyState.sales_mode}
+                  disabled={isPending}
+                  onChange={(e) => handleSalesMode(e.target.value)}
+                  className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  {SALES_MODES.map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="grid gap-1.5">
                 <label className="text-xs text-muted-foreground">야근 정책</label>
-                <select disabled className="h-9 cursor-not-allowed rounded-md border border-input bg-background px-3 text-sm opacity-60">
-                  <option>필요 시 야근</option>
+                <select
+                  value={companyState.overtime_mode}
+                  disabled={isPending}
+                  onChange={(e) => handleOvertimeMode(e.target.value)}
+                  className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  {OVERTIME_MODES.map((m) => (
+                    <option key={m.value} value={m.value}>
+                      {m.label}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
