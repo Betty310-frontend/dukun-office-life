@@ -35,6 +35,17 @@ export default async function HomePage({
     .select('id, date, text, category, is_protagonist')
     .order('date', { ascending: false })
     .order('created_at', { ascending: true })
+  const { data: messengerLogs } = await supabase
+    .from('messenger_logs')
+    .select('id, date, scene_type, scene_title, team, participant_refs, lines, forced')
+    .order('date', { ascending: false })
+    .order('created_at', { ascending: true })
+  // 하루 진행은 is_configured인 모든 프로필을 대상으로 이벤트를 생성하므로(여러 실유저가 회사를 공유),
+  // 메신저 대화 참여자 이름을 표시하려면 본인 프로필뿐 아니라 다른 유저의 이름도 필요하다.
+  const { data: allProfiles } = await supabase
+    .from('profiles')
+    .select('id, name')
+    .eq('is_configured', true)
 
   return (
     <AppShell
@@ -42,6 +53,8 @@ export default async function HomePage({
       npcs={npcs ?? []}
       companyState={companyState}
       dailyEvents={dailyEvents ?? []}
+      messengerLogs={messengerLogs ?? []}
+      profiles={allProfiles ?? []}
       initialTab={initialTab}
       error={error}
     />

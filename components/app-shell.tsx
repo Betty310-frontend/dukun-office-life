@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ProfileFormFields } from '@/components/profile-form-fields'
 import { SimPanel } from '@/components/sim-panel'
 import { LogsPanel, type DailyEventRow } from '@/components/logs-panel'
-import { MessengerPanel } from '@/components/messenger-panel'
+import { MessengerPanel, type MessengerLogRow } from '@/components/messenger-panel'
 import { TalkPanel } from '@/components/talk-panel'
 import { RelationshipsPanel } from '@/components/relationships-panel'
 import { ResetDataPanel } from '@/components/reset-data-panel'
@@ -31,6 +31,7 @@ export interface CompanyState {
   seller_actor_id: string | null
   fire_actor_type: string | null
   fire_actor_id: string | null
+  last_manual_chat_day: number
 }
 
 export function AppShell({
@@ -38,6 +39,8 @@ export function AppShell({
   npcs,
   companyState,
   dailyEvents,
+  messengerLogs,
+  profiles,
   initialTab,
   error,
 }: {
@@ -45,6 +48,8 @@ export function AppShell({
   npcs: Npc[]
   companyState: CompanyState
   dailyEvents: DailyEventRow[]
+  messengerLogs: MessengerLogRow[]
+  profiles: { id: string; name: string }[]
   initialTab: TabId
   error?: string
 }) {
@@ -102,7 +107,16 @@ export function AppShell({
       )}
 
       {activeTab === 'logs' && <LogsPanel events={dailyEvents} />}
-      {activeTab === 'messenger' && <MessengerPanel />}
+      {activeTab === 'messenger' && (
+        <MessengerPanel
+          me={profile}
+          roster={npcs}
+          profiles={profiles}
+          logs={messengerLogs}
+          day={companyState.day}
+          lastManualChatDay={companyState.last_manual_chat_day}
+        />
+      )}
       {activeTab === 'talk' && <TalkPanel people={npcs} />}
       {activeTab === 'relationships' && <RelationshipsPanel />}
       {activeTab === 'resetdata' && <ResetDataPanel />}
