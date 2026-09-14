@@ -15,5 +15,7 @@ export function decideRedirect(input: {
     return pathname === '/onboarding' ? null : '/onboarding'
   }
 
+  if (PUBLIC_PATHS.includes(pathname)) return '/'
+
   return pathname === '/onboarding' ? '/' : null
 }

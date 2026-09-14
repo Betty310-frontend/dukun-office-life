@@ -36,4 +36,14 @@ describe('decideRedirect', () => {
     expect(decideRedirect({ pathname: '/onboarding', isAuthenticated: true, isConfigured: true }))
       .toBe('/')
   })
+
+  it('sends configured users away from /login back to home (e.g. after a stale browser-back)', () => {
+    expect(decideRedirect({ pathname: '/login', isAuthenticated: true, isConfigured: true }))
+      .toBe('/')
+  })
+
+  it('sends configured users away from /signup back to home', () => {
+    expect(decideRedirect({ pathname: '/signup', isAuthenticated: true, isConfigured: true }))
+      .toBe('/')
+  })
 })
