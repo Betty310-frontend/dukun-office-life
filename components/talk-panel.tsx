@@ -429,7 +429,7 @@ function ConversationThread({
                       type="button"
                       variant="secondary"
                       onClick={() => handlePickChoice(c)}
-                      className="h-auto justify-start whitespace-normal py-2 text-left"
+                      className="h-auto justify-start whitespace-normal py-3 text-left"
                     >
                       {c.text}
                     </Button>
@@ -465,7 +465,7 @@ function ConversationThread({
                       type="button"
                       variant="secondary"
                       onClick={() => handlePickChoice(c)}
-                      className="h-auto justify-start whitespace-normal py-2 text-left"
+                      className="h-auto justify-start whitespace-normal py-3 text-left"
                     >
                       {c.text}
                     </Button>
