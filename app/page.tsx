@@ -49,6 +49,17 @@ export default async function HomePage({
   const { data: relationships } = await supabase
     .from('relationships')
     .select('*')
+  const { data: conversations } = await supabase
+    .from('conversations')
+    .select('id, participant_a_type, participant_a_id, participant_b_type, participant_b_id')
+  const { data: conversationMessages } = await supabase
+    .from('conversation_messages')
+    .select('id, conversation_id, sender_type, sender_id, text, created_at')
+    .order('created_at', { ascending: true })
+  const { data: talkMemories } = await supabase
+    .from('talk_memories')
+    .select('actor_type, actor_id, target_type, target_id, date, topic, text')
+    .order('date', { ascending: false })
 
   return (
     <AppShell
@@ -59,6 +70,9 @@ export default async function HomePage({
       messengerLogs={messengerLogs ?? []}
       profiles={allProfiles ?? []}
       relationships={relationships ?? []}
+      conversations={conversations ?? []}
+      conversationMessages={conversationMessages ?? []}
+      talkMemories={talkMemories ?? []}
       initialTab={initialTab}
       error={error}
     />

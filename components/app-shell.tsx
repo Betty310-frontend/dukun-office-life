@@ -7,7 +7,12 @@ import { ProfileFormFields } from '@/components/profile-form-fields'
 import { SimPanel } from '@/components/sim-panel'
 import { LogsPanel, type DailyEventRow } from '@/components/logs-panel'
 import { MessengerPanel, type MessengerLogRow } from '@/components/messenger-panel'
-import { TalkPanel } from '@/components/talk-panel'
+import {
+  TalkPanel,
+  type ConversationMessageRow,
+  type ConversationRow,
+  type TalkMemoryRow,
+} from '@/components/talk-panel'
 import { RelationshipsPanel, type RelationRow } from '@/components/relationships-panel'
 import { ResetDataPanel } from '@/components/reset-data-panel'
 import { saveProfile } from '@/app/onboarding/actions'
@@ -42,6 +47,9 @@ export function AppShell({
   messengerLogs,
   profiles,
   relationships,
+  conversations,
+  conversationMessages,
+  talkMemories,
   initialTab,
   error,
 }: {
@@ -52,6 +60,9 @@ export function AppShell({
   messengerLogs: MessengerLogRow[]
   profiles: Profile[]
   relationships: RelationRow[]
+  conversations: ConversationRow[]
+  conversationMessages: ConversationMessageRow[]
+  talkMemories: TalkMemoryRow[]
   initialTab: TabId
   error?: string
 }) {
@@ -119,7 +130,18 @@ export function AppShell({
           lastManualChatDay={companyState.last_manual_chat_day}
         />
       )}
-      {activeTab === 'talk' && <TalkPanel people={npcs} />}
+      {activeTab === 'talk' && (
+        <TalkPanel
+          me={profile}
+          profiles={profiles}
+          npcs={npcs}
+          relationships={relationships}
+          conversations={conversations}
+          conversationMessages={conversationMessages}
+          talkMemories={talkMemories}
+          companyDate={companyState.date}
+        />
+      )}
       {activeTab === 'relationships' && (
         <RelationshipsPanel profiles={profiles} npcs={npcs} relationships={relationships} />
       )}

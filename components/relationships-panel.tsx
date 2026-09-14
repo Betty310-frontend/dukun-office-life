@@ -25,6 +25,8 @@ export interface RelationRow {
   trust: number
   conflict: number
   romantic: number
+  last_talked_date?: string | null
+  talk_count?: number
 }
 
 type SortKey = 'overall' | 'affection' | 'trust' | 'conflict' | 'romantic'
