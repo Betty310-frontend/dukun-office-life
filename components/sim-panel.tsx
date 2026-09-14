@@ -41,13 +41,28 @@ const ASSIGNMENTS: { role: 'lead' | 'seller' | 'fire'; label: string; typeKey: k
   { role: 'fire', label: '긴급 이슈 대응 담당자', typeKey: 'fire_actor_type', idKey: 'fire_actor_id' },
 ]
 
+interface RosterStats {
+  name: string
+  role: string
+  rank: string
+  team: string
+  traits: string[]
+  gender: string
+  mbti: string
+  work_style: string
+  skill: number
+  sales: number
+  crisis: number
+  stress: number
+}
+
 export function SimPanel({
   me,
   roster,
   companyState,
 }: {
-  me: { id: string; name: string; role: string; rank: string; team: string; traits: string[] }
-  roster: { id: number; name: string; role: string; rank: string; team: string; traits: string[] }[]
+  me: RosterStats & { id: string }
+  roster: (RosterStats & { id: number; active: boolean })[]
   companyState: CompanyState
 }) {
   const router = useRouter()
@@ -237,9 +252,39 @@ export function SimPanel({
           <h2 className="text-lg font-bold">👥 직원 명단</h2>
         </div>
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-          <RosterCard name={`${me.name} (나)`} role={me.role} rank={me.rank} team={me.team} traits={me.traits} compact />
+          <RosterCard
+            name={`${me.name} (나)`}
+            role={me.role}
+            rank={me.rank}
+            team={me.team}
+            traits={me.traits}
+            gender={me.gender}
+            mbti={me.mbti}
+            workStyle={me.work_style}
+            skill={me.skill}
+            sales={me.sales}
+            crisis={me.crisis}
+            stress={me.stress}
+            compact
+          />
           {roster.map((npc) => (
-            <RosterCard key={npc.id} name={npc.name} role={npc.role} rank={npc.rank} team={npc.team} traits={npc.traits} compact />
+            <RosterCard
+              key={npc.id}
+              name={npc.name}
+              role={npc.role}
+              rank={npc.rank}
+              team={npc.team}
+              traits={npc.traits}
+              gender={npc.gender}
+              mbti={npc.mbti}
+              workStyle={npc.work_style}
+              skill={npc.skill}
+              sales={npc.sales}
+              crisis={npc.crisis}
+              stress={npc.stress}
+              active={npc.active}
+              compact
+            />
           ))}
         </div>
       </section>

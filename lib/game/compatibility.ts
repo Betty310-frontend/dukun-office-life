@@ -118,6 +118,10 @@ export const ROLE_META: Record<string, { label: string; impact: string }> = {
   '결재담당': { label: '예산·의사결정 승인 및 병목 관리', impact: 'approval' },
 }
 
+export function roleLabel(role: string): string {
+  return ROLE_META[role]?.label ?? '일반 업무'
+}
+
 export function roleImpactBonus(p: { role: string }, ctx: string): number {
   const r = p.role
   let b = 0
