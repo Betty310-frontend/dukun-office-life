@@ -5,28 +5,9 @@ import { createClient } from '@/lib/supabase/server'
 import { advanceDay, type SalesMode, type OvertimeMode } from '@/lib/game/advance-day'
 import { categorizeLog } from '@/lib/game/log-category'
 import { addOneDay, isWeekendDate } from '@/lib/game/date'
-import { relKey, type ActorType, type RelationsMap } from '@/lib/game/relations'
+import { relKey, type RelationsMap } from '@/lib/game/relations'
+import { toWorkforceMember } from '@/lib/game/workforce'
 import type { WorkforceMember } from '@/lib/game/types'
-
-function toWorkforceMember(type: ActorType, row: Record<string, unknown>): WorkforceMember {
-  return {
-    type,
-    id: String(row.id),
-    name: row.name as string,
-    team: row.team as string,
-    rank: row.rank as string,
-    role: row.role as string,
-    gender: row.gender as string,
-    mbti: row.mbti as string,
-    workStyle: row.work_style as string,
-    traits: (row.traits as string[]) ?? [],
-    prefTraits: (row.pref_traits as string[]) ?? [],
-    skill: row.skill as number,
-    sales: row.sales as number,
-    crisis: row.crisis as number,
-    stress: row.stress as number,
-  }
-}
 
 function pickAssigned(
   workforce: WorkforceMember[],
