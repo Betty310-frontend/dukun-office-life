@@ -345,23 +345,36 @@ function ConversationThread({
                 오늘 {selected.name}과(와)는 이미 대화했습니다. 직원 한 명당 하루에 한 번만 대화할 수 있습니다. 다음 날 다시 대화할 수 있습니다.
               </p>
             ) : choices ? (
-              <div className="grid gap-2">
-                {choices.map((c, i) => (
-                  <Button
-                    key={i}
-                    type="button"
-                    variant="secondary"
-                    disabled={isPending}
-                    onClick={() => handlePickChoice(c)}
-                    className="h-auto justify-start whitespace-normal py-2 text-left"
-                  >
-                    {c.text}
-                  </Button>
-                ))}
-              </div>
+              isPending ? (
+                <p className="flex items-center gap-2 py-1 text-xs text-muted-foreground">
+                  <span className="inline-block size-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  답장을 작성하고 있어요...
+                </p>
+              ) : (
+                <div className="grid gap-2">
+                  {choices.map((c, i) => (
+                    <Button
+                      key={i}
+                      type="button"
+                      variant="secondary"
+                      onClick={() => handlePickChoice(c)}
+                      className="h-auto justify-start whitespace-normal py-2 text-left"
+                    >
+                      {c.text}
+                    </Button>
+                  ))}
+                </div>
+              )
             ) : (
               <Button type="button" disabled={isPending} onClick={handleStartTalk}>
-                대화 시작하기
+                {isPending ? (
+                  <span className="flex items-center gap-2">
+                    <span className="inline-block size-3 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                    대화 시작하는 중...
+                  </span>
+                ) : (
+                  '대화 시작하기'
+                )}
               </Button>
             )}
           </div>
