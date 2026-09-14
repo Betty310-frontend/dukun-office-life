@@ -83,7 +83,7 @@ create policy "npcs writable by authenticated"
 
 ---
 
-## Task 13: 대화하기 (OpenAI 연동)
+## Task 13: 대화하기 (OpenAI 연동) ✅ (커밋 `6752fed`/`aee7ce7`/`2804960`/`7f20efa`)
 
 가장 큰 작업 — 여러 커밋으로 나눔.
 
@@ -91,39 +91,41 @@ create policy "npcs writable by authenticated"
 - Create: `supabase/migrations/0004_conversations.sql`, `lib/ai/openai.ts`, `lib/game/talk.ts`, `app/actions/talk.ts`
 - Modify: `components/talk-panel.tsx`, `app-shell.tsx`, `app/page.tsx`, `.env.local.example`
 
-- [ ] **Step 1: 스키마 마이그레이션**
+- [x] **Step 1: 스키마 마이그레이션**
 
 `conversations`(참가자 쌍당 1개, canonical key), `conversation_messages`(sender_type/id, text, meta jsonb), `talk_memories`(actor/target, date, topic, text), `relationships`에 `last_talked_date date`/`talk_count int default 0` 컬럼 추가. RLS: 기존 테이블과 같은 "인증되면 전부 읽기/쓰기" 철학이되 `conversation_messages` insert는 `sender_type='npc' or sender_id=auth.uid()::text`로 사칭 방지.
 
-- [ ] **Step 2: `lib/game/talk.ts` — fallback + 관계 로직 (verbatim 포팅)**
+- [x] **Step 2: `lib/game/talk.ts` — fallback + 관계 로직 (verbatim 포팅)**
 
 `WORKPLACE_TALK_CHOICES`(업무/관계/일상), `stableHash`/`seededUnit`/`shuffledBySeed`(결정적 fallback 선택), `genericChoiceReply`(실제로 실행되는 코드 — `employeeReplyForWorkplaceChoice`의 `switch(choice.id)`는 원본에서도 안 맞는 죽은 코드라 포팅 안 함), `employeeChoiceTone`, `relationDeltaForTalkChoice`(`relationDeltaForWorkplaceChoice` verbatim), `maybeCreateTalkMemory`(`maybeCreateMemory` 포팅 + group/kind→topic 매핑 신규 설계), daily limit(`relation.last_talked_date === companyState.date`).
 
-- [ ] **Step 3: Commit (스키마 + fallback 로직)**
+- [x] **Step 3: Commit (스키마 + fallback 로직)**
 
-- [ ] **Step 4: `lib/ai/openai.ts`**
+- [x] **Step 4: `lib/ai/openai.ts`**
 
 `generateTalkChoices(npc, relation)`, `generateNpcReply(npc, relation, choice)`. 키 없음/fetch 실패/timeout/zod 검증 실패 시 `null` 반환(throw 안 함). `kind`는 `genericChoiceReply`가 쓰는 어휘 그대로 zod enum 검증. 프롬프트에 NPC의 name/team/rank/role/mbti/workStyle/traits + 현재 relation 수치 포함. 모델 `gpt-4o-mini`, 선택지는 `json_schema` 구조화 출력.
 
-- [ ] **Step 5: `app/actions/talk.ts`**
+- [x] **Step 5: `app/actions/talk.ts`**
 
 `startNpcTalkAction(npcId)`(오늘 이미 대화했는지 체크 → AI 시도 → 실패 시 fallback 3개, DB 쓰기 없음), `sendNpcTalkAction(npcId, choice)`(동시성 재체크 → AI 답변 시도/fallback → conversations/conversation_messages insert → relationDeltaForTalkChoice 적용해 relationships upsert(+last_talked_date, talk_count+1) → maybeCreateTalkMemory → talk_memories insert → revalidatePath), `sendConversationMessageAction(otherActor, text)`(실유저↔실유저, AI 없음, conversation upsert + message insert + last_message_at 갱신).
 
-- [ ] **Step 6: Commit (OpenAI 연동 + 서버 액션)**
+- [x] **Step 6: Commit (OpenAI 연동 + 서버 액션)**
 
-- [ ] **Step 7: `TalkPanel` 컴포넌트**
+- [x] **Step 7: `TalkPanel` 컴포넌트**
 
 좌측 목록(profiles 본인 제외 + npcs, NPC는 오늘 대화 완료 배지+relationLabel). 우측 — NPC: 관계 미터 + 선택지 로딩 → 3개 버튼 → 결과(말풍선 + 관계 변화 + 추억 박스, 최근 5개). 오늘 이미 했으면 원본 문구 그대로. 우측 — 실유저: 자유 텍스트 입력 + 말풍선 리스트 + Supabase Realtime(`postgres_changes` on `conversation_messages`)로 실시간 반영, 하루 제한 없음.
 
 `.env.local.example`에 `OPENAI_API_KEY=` 추가(값 없이).
 
-- [ ] **Step 8: `app-shell.tsx`/`page.tsx` 배선**
+- [x] **Step 8: `app-shell.tsx`/`page.tsx` 배선**
 
-- [ ] **Step 9: 브라우저로 확인**
+- [x] **Step 9: 브라우저로 확인**
 
-실제 AI 경로로 확인(선택지가 NPC 성격에 맞는지, 답변 자연스러운지, 관계 수치 변화, 오늘 재시도 시 제한 문구, 실유저 채팅 동작). fallback 경로는 코드 리뷰 수준 확인(필요하면 키를 임시로 틀리게 바꿔 한 번 확인 후 원복).
+실제 AI 경로로 확인 완료: NPC(김팀장)에게 "대화 시작하기" → 업무/관계/일상 카테고리별로 자연스러운 AI 생성 선택지 3개(직급에 맞는 존댓말 톤) → 하나 선택 → 캐릭터에 맞는 AI 답변 + 관계 수치 반영(신뢰 50→51) 확인. 오늘 재대화 시도 시 제한 배지("오늘 대화 완료")와 문구 정상 표시. 실유저(테스트유저)에게 자유 텍스트 메시지 전송 후 말풍선으로 즉시 반영되는 것도 확인. fallback 경로(키 없음/실패 시)는 코드 리뷰 수준으로만 확인 — 실제 키가 있어 라이브 경로 위주로 검증함.
 
-- [ ] **Step 10: Commit (UI + 배선)**
+브라우저 검증 중 발견한 사소한 버그 하나 수정: `router.refresh()` 이후 `talkedToday`가 `true`로 바뀌면서 방금 받은 관계 변화(`talkResult`) 요약이 "오늘 이미 대화했습니다" 문구로 즉시 덮어써지던 것 — 표시 우선순위를 talkResult 먼저로 바꿔서 고침(커밋 `7f20efa`).
+
+- [x] **Step 10: Commit (UI + 배선)**
 
 ---
 
