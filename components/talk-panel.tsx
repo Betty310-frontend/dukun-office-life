@@ -81,7 +81,7 @@ export function TalkPanel({
     [profiles, npcs, me.id]
   )
 
-  const [selectedKey, setSelectedKey] = useState<string | null>(people[0] ? `${people[0].type}:${people[0].id}` : null)
+  const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const selected = people.find((p) => `${p.type}:${p.id}` === selectedKey) ?? null
 
   const [query, setQuery] = useState('')
