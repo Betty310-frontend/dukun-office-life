@@ -619,21 +619,25 @@ git commit -m "Wire simulation tab to real company_state and advance-day action"
 - Consumes: `daily_events` 테이블
 - Produces: 일일 로그 탭에서 날짜별/카테고리별 로그 열람.
 
-- [ ] **Step 1: 서버에서 최근 로그 조회**
+- [x] **Step 1: 서버에서 최근 로그 조회**
 
 `app/page.tsx`(또는 로그 탭 전용 서버 컴포넌트)에서 `daily_events`를 `date desc, created_at asc`로 조회(최근 N일 또는 전체 — 우선 전체, 필요시 이후 페이지네이션).
 
-- [ ] **Step 2: `DailyLogPanel` 컴포넌트**
+- [x] **Step 2: `DailyLogPanel` 컴포넌트**
 
 원본의 `renderLogViewer`(날짜 필터 + 카테고리 필터: 전체/업무/업무외 이벤트/출퇴근·점심·퇴근후/주말·공휴일/계절·기념일 이벤트)를 참고해 날짜별로 묶어 카드 리스트로 렌더링. 카테고리 필터는 클라이언트 상태(`useState`)로 처리(이미 로드된 전체 로그를 필터링 — 서버 재조회 불필요). `is_protagonist` 항목은 원본처럼 살짝 다른 배경색(핑크 톤)으로 강조.
 
-- [ ] **Step 3: `app-shell.tsx`의 로그 스텁을 `DailyLogPanel`로 교체**
+기존 스텁 컴포넌트가 이미 `components/logs-panel.tsx` / `LogsPanel`이라는 이름으로 app-shell에 연결되어 있어서, 별도 `daily-log-panel.tsx`를 새로 만드는 대신 그 파일 내용을 실제 구현으로 교체함(불필요한 파일 중복 방지).
 
-- [ ] **Step 4: 브라우저로 확인**
+- [x] **Step 3: `app-shell.tsx`의 로그 스텁을 `DailyLogPanel`로 교체**
+
+(위와 동일한 이유로 `LogsPanel`을 그대로 유지하고 `events` prop만 추가.)
+
+- [x] **Step 4: 브라우저로 확인**
 
 하루 진행을 2~3회 실행한 뒤 일일 로그 탭에서 날짜별로 잘 묶이는지, 카테고리 필터가 동작하는지, 모바일에서도 읽기 편한지 확인.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A
