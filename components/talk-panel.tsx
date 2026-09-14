@@ -362,13 +362,19 @@ function ConversationThread({
         {selected.type === 'npc' ? (
           <div className="grid gap-2 rounded-xl border border-border bg-accent/60 p-3">
             {talkResult ? (
-              <p className="text-xs text-muted-foreground">
-                호감 {talkResult.delta.affection >= 0 ? '+' : ''}
-                {talkResult.delta.affection} · 신뢰 {talkResult.delta.trust >= 0 ? '+' : ''}
-                {talkResult.delta.trust} · 갈등 {talkResult.delta.conflict >= 0 ? '+' : ''}
-                {talkResult.delta.conflict}
-                {talkResult.memory && <> · 💗 새로운 추억이 생겼어요</>}
-              </p>
+              <div className="grid gap-2">
+                <div className="max-w-[82%] rounded-2xl rounded-tl-sm bg-[#f8f4f6] px-3 py-2 text-sm leading-relaxed">
+                  <span className="mb-0.5 block text-[11px] font-bold text-muted-foreground">{selected.name}</span>
+                  {talkResult.reply}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  호감 {talkResult.delta.affection >= 0 ? '+' : ''}
+                  {talkResult.delta.affection} · 신뢰 {talkResult.delta.trust >= 0 ? '+' : ''}
+                  {talkResult.delta.trust} · 갈등 {talkResult.delta.conflict >= 0 ? '+' : ''}
+                  {talkResult.delta.conflict}
+                  {talkResult.memory && <> · 💗 새로운 추억이 생겼어요</>}
+                </p>
+              </div>
             ) : talkedToday ? (
               <p className="text-xs text-muted-foreground">
                 오늘 {selected.name}과(와)는 이미 대화했습니다. 직원 한 명당 하루에 한 번만 대화할 수 있습니다. 다음 날 다시 대화할 수 있습니다.
