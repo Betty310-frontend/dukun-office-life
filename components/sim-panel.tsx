@@ -217,16 +217,15 @@ export function SimPanel({
         </Card>
       </section>
 
-      <section className="flex flex-col gap-2 sm:flex-row">
+      <section>
         <Button
           type="button"
           disabled={isPending}
           onClick={handleAdvanceDay}
-          className="h-auto flex-1 py-3.5 text-base font-extrabold"
+          className="h-auto w-full py-3.5 text-base font-extrabold"
         >
           🎲 하루 진행
         </Button>
-        <Button type="button" variant="secondary" disabled>로그만 초기화</Button>
       </section>
 
       <section>
