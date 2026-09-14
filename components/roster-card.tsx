@@ -6,26 +6,34 @@ export function RosterCard({
   rank,
   team,
   traits,
+  compact = false,
 }: {
   name: string
   role: string
   rank: string
   team: string
   traits: string[]
+  compact?: boolean
 }) {
   const initial = name.trim().charAt(0) || '?'
 
   return (
-    <Card>
-      <CardContent className="flex gap-3">
-        <div className="grid size-11 shrink-0 place-items-center rounded-xl border border-border bg-[image:linear-gradient(135deg,#ffe7f0,#fff7fb)] text-base font-extrabold">
+    <Card size={compact ? 'sm' : 'default'}>
+      <CardContent className="flex items-center gap-3">
+        <div
+          className={`grid shrink-0 place-items-center rounded-xl border border-border bg-[image:linear-gradient(135deg,#ffe7f0,#fff7fb)] font-extrabold ${
+            compact ? 'size-9 text-sm' : 'size-11 text-base'
+          }`}
+        >
           {initial}
         </div>
         <div className="min-w-0">
-          <p className="truncate text-base font-bold">{name}</p>
-          <p className="mt-0.5 text-xs text-muted-foreground">{team} · {rank} · {role}</p>
+          <p className={`truncate font-bold ${compact ? 'text-sm' : 'text-base'}`}>{name}</p>
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">
+            {team} · {rank} · {role}
+          </p>
           {traits.length > 0 && (
-            <p className="mt-2 text-xs text-muted-foreground">{traits.join(', ')}</p>
+            <p className={`text-xs text-muted-foreground ${compact ? 'mt-1 truncate' : 'mt-2'}`}>{traits.join(', ')}</p>
           )}
         </div>
       </CardContent>

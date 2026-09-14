@@ -12,6 +12,7 @@ import { formatDate, seasonName, weekdayNameFromDate } from '@/lib/game/date'
 import type { CompanyState } from '@/components/app-shell'
 import type { ActorType } from '@/lib/game/relations'
 import type { OvertimeMode, SalesMode } from '@/lib/game/advance-day'
+import { TEAMS } from '@/lib/validation/profile'
 
 const SALES_MODES: { value: SalesMode; label: string }[] = [
   { value: 'safe', label: '보수적 수주' },
@@ -57,6 +58,9 @@ export function SimPanel({
     { type: 'profile', id: me.id, name: `${me.name} (나)`, role: me.role, rank: me.rank, team: me.team, traits: me.traits },
     ...roster.map((npc) => ({ type: 'npc' as const, id: String(npc.id), name: npc.name, role: npc.role, rank: npc.rank, team: npc.team, traits: npc.traits })),
   ]
+  const peopleByTeam = TEAMS.map((team) => ({ team, people: allPeople.filter((p) => p.team === team) })).filter(
+    (g) => g.people.length > 0
+  )
 
   function handleAdvanceDay() {
     startTransition(async () => {
@@ -232,10 +236,10 @@ export function SimPanel({
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-bold">👥 직원 명단</h2>
         </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <RosterCard name={`${me.name} (나)`} role={me.role} rank={me.rank} team={me.team} traits={me.traits} />
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+          <RosterCard name={`${me.name} (나)`} role={me.role} rank={me.rank} team={me.team} traits={me.traits} compact />
           {roster.map((npc) => (
-            <RosterCard key={npc.id} name={npc.name} role={npc.role} rank={npc.rank} team={npc.team} traits={npc.traits} />
+            <RosterCard key={npc.id} name={npc.name} role={npc.role} rank={npc.rank} team={npc.team} traits={npc.traits} compact />
           ))}
         </div>
       </section>
@@ -261,10 +265,14 @@ export function SimPanel({
                       <option value="" disabled>
                         담당자를 선택하세요
                       </option>
-                      {allPeople.map((p) => (
-                        <option key={`${p.type}:${p.id}`} value={`${p.type}:${p.id}`}>
-                          {p.name}
-                        </option>
+                      {peopleByTeam.map(({ team, people }) => (
+                        <optgroup key={team} label={team}>
+                          {people.map((p) => (
+                            <option key={`${p.type}:${p.id}`} value={`${p.type}:${p.id}`}>
+                              {p.name}
+                            </option>
+                          ))}
+                        </optgroup>
                       ))}
                     </select>
                   </div>

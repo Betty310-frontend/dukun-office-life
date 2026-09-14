@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { manualChatAction } from '@/app/actions/manual-chat'
 import { formatDate, weekdayNameFromDate } from '@/lib/game/date'
 import type { ActorType } from '@/lib/game/relations'
+import { TEAMS } from '@/lib/validation/profile'
 
 const MANUAL_CHAT_COOLDOWN_DAYS = 3
 
@@ -27,6 +28,7 @@ interface Person {
   name: string
   role: string
   rank: string
+  team: string
 }
 
 export function MessengerPanel({
@@ -37,8 +39,8 @@ export function MessengerPanel({
   day,
   lastManualChatDay,
 }: {
-  me: { id: string; name: string; role: string; rank: string }
-  roster: { id: number; name: string; role: string; rank: string }[]
+  me: { id: string; name: string; role: string; rank: string; team: string }
+  roster: { id: number; name: string; role: string; rank: string; team: string }[]
   profiles: { id: string; name: string }[]
   logs: MessengerLogRow[]
   day: number
@@ -51,10 +53,14 @@ export function MessengerPanel({
 
   const allPeople: Person[] = useMemo(
     () => [
-      { type: 'profile', id: me.id, name: me.name, role: me.role, rank: me.rank },
-      ...roster.map((npc) => ({ type: 'npc' as const, id: String(npc.id), name: npc.name, role: npc.role, rank: npc.rank })),
+      { type: 'profile', id: me.id, name: me.name, role: me.role, rank: me.rank, team: me.team },
+      ...roster.map((npc) => ({ type: 'npc' as const, id: String(npc.id), name: npc.name, role: npc.role, rank: npc.rank, team: npc.team })),
     ],
     [me, roster]
+  )
+  const peopleByTeam = useMemo(
+    () => TEAMS.map((team) => ({ team, people: allPeople.filter((p) => p.team === team) })).filter((g) => g.people.length > 0),
+    [allPeople]
   )
   // 하루 진행은 여러 실유저 프로필을 대상으로 씬을 생성할 수 있으므로, 이름 조회는 select 옵션(me+roster)이
   // 아니라 전체 profiles(다른 유저 포함) + roster로 해야 한다.
@@ -120,10 +126,14 @@ export function MessengerPanel({
                 onChange={(e) => setPersonA(e.target.value)}
                 className="h-9 rounded-md border border-input bg-background px-3 text-sm"
               >
-                {allPeople.map((p) => (
-                  <option key={`${p.type}:${p.id}`} value={`${p.type}:${p.id}`}>
-                    {p.name} · {p.rank || '사원'} · {p.role}
-                  </option>
+                {peopleByTeam.map(({ team, people }) => (
+                  <optgroup key={team} label={team}>
+                    {people.map((p) => (
+                      <option key={`${p.type}:${p.id}`} value={`${p.type}:${p.id}`}>
+                        {p.name} · {p.rank || '사원'} · {p.role}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>
@@ -135,10 +145,14 @@ export function MessengerPanel({
                 onChange={(e) => setPersonB(e.target.value)}
                 className="h-9 rounded-md border border-input bg-background px-3 text-sm"
               >
-                {allPeople.map((p) => (
-                  <option key={`${p.type}:${p.id}`} value={`${p.type}:${p.id}`}>
-                    {p.name} · {p.rank || '사원'} · {p.role}
-                  </option>
+                {peopleByTeam.map(({ team, people }) => (
+                  <optgroup key={team} label={team}>
+                    {people.map((p) => (
+                      <option key={`${p.type}:${p.id}`} value={`${p.type}:${p.id}`}>
+                        {p.name} · {p.rank || '사원'} · {p.role}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>

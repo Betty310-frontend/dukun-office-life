@@ -106,37 +106,47 @@ export function TalkPanel({
         </p>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-[240px_1fr]">
-          <div className="grid gap-2 content-start">
-            {people.map((p) => {
-              const rel = p.type === 'npc' ? myRelationTo(p) : undefined
-              const done = p.type === 'npc' && rel?.last_talked_date === companyDate
-              return (
-                <button
-                  key={`${p.type}:${p.id}`}
-                  type="button"
-                  onClick={() => setSelectedKey(`${p.type}:${p.id}`)}
-                  className={`rounded-xl border px-3 py-2.5 text-left text-sm transition-colors ${
-                    selectedKey === `${p.type}:${p.id}`
-                      ? 'border-primary bg-primary/10 font-semibold text-foreground'
-                      : 'border-border bg-background text-muted-foreground hover:bg-accent'
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span>{p.name}</span>
-                    {done && <span className="rounded-full border border-border px-1.5 py-0.5 text-[10px]">오늘 대화 완료</span>}
-                  </div>
-                  <div className="text-[11px] text-muted-foreground">
-                    {p.rank || '사원'} · {p.role}
-                  </div>
-                </button>
-              )
-            })}
-            {people.length === 0 && (
-              <div className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-                대화할 사람이 없어요
+          {people.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+              대화할 사람이 없어요
+            </div>
+          ) : (
+            <div className="max-h-[420px] overflow-y-auto rounded-xl border border-border">
+              <div className="divide-y divide-border">
+                {people.map((p) => {
+                  const rel = p.type === 'npc' ? myRelationTo(p) : undefined
+                  const done = p.type === 'npc' && rel?.last_talked_date === companyDate
+                  const active = selectedKey === `${p.type}:${p.id}`
+                  const initial = p.name.trim().charAt(0) || '?'
+                  return (
+                    <button
+                      key={`${p.type}:${p.id}`}
+                      type="button"
+                      onClick={() => setSelectedKey(`${p.type}:${p.id}`)}
+                      className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm transition-colors ${
+                        active ? 'bg-primary/10' : 'hover:bg-accent'
+                      }`}
+                    >
+                      <span className="grid size-8 shrink-0 place-items-center rounded-full border border-border bg-[image:linear-gradient(135deg,#ffe7f0,#fff7fb)] text-xs font-extrabold">
+                        {initial}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className={`block truncate ${active ? 'font-semibold text-foreground' : 'text-foreground'}`}>{p.name}</span>
+                        <span className="block truncate text-[11px] text-muted-foreground">
+                          {p.rank || '사원'} · {p.role}
+                        </span>
+                      </span>
+                      {done && (
+                        <span className="shrink-0 rounded-full border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                          완료
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {!selected ? (
             <div className="rounded-xl border border-border p-6 text-center text-sm text-muted-foreground">
