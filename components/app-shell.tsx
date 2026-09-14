@@ -21,7 +21,7 @@ import type { ProfileInput } from '@/lib/validation/profile'
 import { TABS, type TabId } from '@/lib/tabs'
 import { formatDate, seasonName, weekdayNameFromDate } from '@/lib/game/date'
 
-type Profile = ProfileInput & { id: string }
+type Profile = ProfileInput & { id: string; fortune_date: string | null; fortune_text: string | null }
 type Npc = ProfileInput & { id: number; active: boolean }
 export interface CompanyState {
   day: number

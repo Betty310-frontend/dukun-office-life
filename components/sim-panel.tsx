@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { RosterCard } from '@/components/roster-card'
 import { NpcEditor } from '@/components/npc-editor'
+import { DailyFortuneCard } from '@/components/daily-fortune-card'
 import { advanceDayAction } from '@/app/actions/advance-day'
 import { assignRole, setOvertimeMode, setSalesMode } from '@/app/actions/company-state'
 import { fmt } from '@/lib/game/format'
@@ -63,7 +64,7 @@ export function SimPanel({
   allRoster,
   companyState,
 }: {
-  me: RosterStats & { id: string }
+  me: RosterStats & { id: string; fortune_date: string | null; fortune_text: string | null }
   roster: (RosterStats & { id: number; active: boolean })[]
   allRoster: (RosterStats & { id: number; active: boolean })[]
   companyState: CompanyState
@@ -169,6 +170,8 @@ export function SimPanel({
           </div>
         </div>
       </section>
+
+      <DailyFortuneCard cachedDate={me.fortune_date} cachedFortune={me.fortune_text} companyDate={companyState.date} />
 
       <section className="grid gap-4 sm:grid-cols-[1.1fr_.9fr]">
         <Card>

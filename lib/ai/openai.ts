@@ -25,6 +25,7 @@ const choiceSchema = z.object({
 })
 const choicesResponseSchema = z.object({ choices: z.array(choiceSchema).length(3) })
 const replyResponseSchema = z.object({ reply: z.string().min(1).max(300) })
+const fortuneResponseSchema = z.object({ fortune: z.string().min(1).max(150) })
 
 const MODEL = 'gpt-4o-mini'
 const TIMEOUT_MS = 12000
@@ -164,4 +165,28 @@ export async function generateNpcReply(
     return null
   }
   return result.data.reply
+}
+
+export async function generateDailyFortune(me: WorkforceMember, dateLabel: string): Promise<string | null> {
+  const system = '당신은 한국 광고대행사를 배경으로 한 회사생활 시뮬레이션 게임의 "오늘의 운세" 생성기입니다. 반드시 JSON만 출력하세요.'
+  const user = `${dateLabel}, ${me.name}의 오늘의 운세를 만들어주세요.
+
+캐릭터 정보: ${characterProfileLine(me)}
+
+업무운·인간관계운·연애운 중 하나(또는 섞어서) 느낌으로, 귀엽고 산뜻한 톤의 짧은 운세 한두 문장을 만들어주세요. 캐릭터의 성격·MBTI·업무스타일을 살짝 반영하되 점술 용어(사주, 별자리 등)는 쓰지 말고, 회사생활/대화/관계 소재로 자연스럽게 표현하세요.
+
+다음 JSON 형식으로만 답하세요: {"fortune":"..."}`
+
+  const parsed = await callOpenAI([
+    { role: 'system', content: system },
+    { role: 'user', content: user },
+  ])
+  if (!parsed) return null
+
+  const result = fortuneResponseSchema.safeParse(parsed)
+  if (!result.success) {
+    console.error('[openai] fortune schema validation failed:', result.error.message)
+    return null
+  }
+  return result.data.fortune
 }
