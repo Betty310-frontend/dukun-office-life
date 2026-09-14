@@ -45,13 +45,13 @@ Task 11 → 12 → 13 순서(작은 것부터)로 각각 독립적으로 구현�
 
 ---
 
-## Task 12: 데이터 초기화
+## Task 12: 데이터 초기화 ✅ (커밋 `0f919aa`, 마이그레이션 적용은 사용자가 진행 중)
 
 **Files:**
 - Create: `supabase/migrations/0003_reset_policies.sql`, `app/actions/reset-data.ts`
 - Modify: `components/reset-data-panel.tsx`
 
-- [ ] **Step 1: RLS 마이그레이션**
+- [x] **Step 1: RLS 마이그레이션**
 
 ```sql
 create policy "daily_events deletable by authenticated"
@@ -63,21 +63,23 @@ create policy "npcs writable by authenticated"
 ```
 (`relationships`는 이미 `for all`이라 그대로 사용.) NPC 스트레스 silent-failure 버그도 같이 고침 — 커밋 메시지에 명시.
 
-- [ ] **Step 2: 사용자에게 마이그레이션 적용 확인 후 Supabase에 적용**
+- [ ] **Step 2: 사용자가 Supabase SQL Editor에서 직접 적용** (진행 중 — 적용 전까지는 daily_events/messenger_logs delete와 npcs update가 RLS에 막혀 조용히 0행 처리됨)
 
-- [ ] **Step 3: `resetSimulationAction()` 서버 액션**
+- [x] **Step 3: `resetSimulationAction()` 서버 액션**
 
 `daily_events`/`messenger_logs`/`relationships` 전체 delete → `npcs` 스트레스를 seed.sql 리터럴 값(`{1:28,2:34,3:22}`)으로 복원 → `company_state`(id=1)를 스키마 기본값으로 복원(day:1, date:'2026-09-10', cash:30000000, revenue:0, clients:0, reputation:50, sales_mode:'balanced', overtime_mode:'normal', last_advanced_date:null, last_manual_chat_day:-999, lead/seller/fire 배정 null) → `revalidatePath('/')`. `profiles`는 건드리지 않음.
 
-- [ ] **Step 4: `ResetDataPanel` UI**
+- [x] **Step 4: `ResetDataPanel` UI**
 
 경고 문구를 실제 범위로 수정, 네이티브 confirm/alert 대신 인라인 2단계 확인 카드.
 
-- [ ] **Step 5: 브라우저로 확인**
+- [x] **Step 5: 브라우저로 확인** (마이그레이션 적용 전 부분 확인)
 
-초기화 후 시뮬레이션 탭 수치가 시드값으로, NPC 스트레스도 리셋됐는지, 내정보는 안 바뀌었는지 확인.
+실제로 2단계 확인 → 초기화 실행까지 브라우저에서 해봄. `company_state`(day/date/cash/revenue/clients/reputation)는 시드값으로 정확히 복원됨 — 이미 update 정책이 있던 부분은 예상대로 동작. `daily_events`/`messenger_logs`/`npcs` 스트레스는 마이그레이션 미적용 상태라 예상대로 조용히 그대로 남음(에러 없이 0행) — 이건 버그가 아니라 마이그레이션 적용 전 RLS가 막은 것이고, 액션 로직 자체가 올바르게 동작함을 확인한 것. **마이그레이션 적용 후 daily_events/messenger_logs/npcs 스트레스까지 실제로 비워지는지 재확인 필요.**
 
-- [ ] **Step 6: Commit**
+이 테스트로 실제 공유 시뮬레이션 진행 상황(day 2 → 1, 인간관계 리셋 등)이 초기화됨 — 사용자에게 공지함.
+
+- [x] **Step 6: Commit**
 
 ---
 
