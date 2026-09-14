@@ -11,11 +11,13 @@ export function ResetDataPanel() {
   const [isPending, startTransition] = useTransition()
   const [confirming, setConfirming] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const [messageOk, setMessageOk] = useState(true)
 
   function handleReset() {
     startTransition(async () => {
       const result = await resetSimulationAction()
       setMessage(result.message)
+      setMessageOk(result.ok)
       setConfirming(false)
       if (result.ok) router.refresh()
     })
@@ -50,7 +52,9 @@ export function ResetDataPanel() {
           </div>
         )}
 
-        {message && <p className="mt-3 text-sm text-muted-foreground">{message}</p>}
+        {message && (
+          <p className={`mt-3 text-sm font-semibold ${messageOk ? 'text-primary' : 'text-destructive'}`}>{message}</p>
+        )}
       </CardContent>
     </Card>
   )

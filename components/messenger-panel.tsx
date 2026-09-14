@@ -49,6 +49,7 @@ export function MessengerPanel({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [message, setMessage] = useState<string | null>(null)
+  const [messageOk, setMessageOk] = useState(true)
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
   const allPeople: Person[] = useMemo(
@@ -94,6 +95,7 @@ export function MessengerPanel({
   function handleManualChat() {
     if (personA === personB) {
       setMessage('서로 다른 직원 두 명을 선택해주세요.')
+      setMessageOk(false)
       return
     }
     const [aType, aId] = personA.split(':') as [ActorType, string]
@@ -101,6 +103,7 @@ export function MessengerPanel({
     startTransition(async () => {
       const result = await manualChatAction({ type: aType, id: aId }, { type: bType, id: bId })
       setMessage(result.message)
+      setMessageOk(result.ok)
       if (result.ok) {
         setSelectedDate(null)
         router.refresh()
@@ -163,7 +166,9 @@ export function MessengerPanel({
           <p className="mt-2 text-xs text-muted-foreground">
             {canChat ? '직접 매칭 가능 · 원하는 두 직원을 선택하세요.' : `직접 매칭 재사용까지 ${remainDays}일 남았습니다.`}
           </p>
-          {message && <p className="mt-1 text-xs font-semibold text-foreground">{message}</p>}
+          {message && (
+            <p className={`mt-1 text-xs font-semibold ${messageOk ? 'text-foreground' : 'text-destructive'}`}>{message}</p>
+          )}
         </div>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-[240px_1fr]">

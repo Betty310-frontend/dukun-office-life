@@ -71,6 +71,7 @@ export function SimPanel({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [resultMessage, setResultMessage] = useState<string | null>(null)
+  const [resultOk, setResultOk] = useState(true)
 
   const allPeople: Person[] = [
     { type: 'profile', id: me.id, name: `${me.name} (나)`, role: me.role, rank: me.rank, team: me.team, traits: me.traits },
@@ -84,6 +85,7 @@ export function SimPanel({
     startTransition(async () => {
       const result = await advanceDayAction()
       setResultMessage(result.message)
+      setResultOk(result.ok)
       if (result.ok) router.refresh()
     })
   }
@@ -246,7 +248,13 @@ export function SimPanel({
       <Card>
         <CardContent>
           <h3 className="text-base font-bold">📰 오늘의 결과</h3>
-          <div className="mt-3 rounded-xl border border-border bg-accent/60 p-3 text-sm text-muted-foreground">
+          <div
+            className={`mt-3 rounded-xl border p-3 text-sm ${
+              resultMessage && !resultOk
+                ? 'border-destructive/30 bg-destructive/5 font-semibold text-destructive'
+                : 'border-border bg-accent/60 text-muted-foreground'
+            }`}
+          >
             {resultMessage ?? `${companyState.day}일차 · 아직 오늘의 '하루 진행'을 실행하지 않았어요.`}
           </div>
         </CardContent>
