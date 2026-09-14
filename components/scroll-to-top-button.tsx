@@ -54,7 +54,20 @@ export function ScrollToTopButton() {
           className="transition-[stroke-dashoffset] duration-150"
         />
       </svg>
-      <span className="relative text-base leading-none font-bold text-foreground">↑</span>
+      <svg
+        className="relative"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="var(--primary)"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M5 13l7-7 7 7" />
+        <path d="M12 19V7" />
+      </svg>
     </button>
   )
 }
