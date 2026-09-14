@@ -17,6 +17,7 @@ import { RelationshipsPanel, type RelationRow } from '@/components/relationships
 import { ResetDataPanel } from '@/components/reset-data-panel'
 import { ScrollToTopButton } from '@/components/scroll-to-top-button'
 import { saveProfile } from '@/app/onboarding/actions'
+import { logout } from '@/app/actions/auth'
 import type { ProfileInput } from '@/lib/validation/profile'
 import { TABS, type TabId } from '@/lib/tabs'
 import { formatDate, seasonName, weekdayNameFromDate } from '@/lib/game/date'
@@ -90,8 +91,24 @@ export function AppShell({
           <span className="truncate text-sm font-bold">
             🗓️ {formatDate(companyState.date)} · {weekdayNameFromDate(companyState.date)} · {seasonName(companyState.date)}
           </span>
-          <span className="shrink-0 rounded-full bg-white/20 px-2.5 py-1 text-xs font-bold whitespace-nowrap">
-            {companyState.day}일차
+          <span className="flex shrink-0 items-center gap-2">
+            <span className="rounded-full bg-white/20 px-2.5 py-1 text-xs font-bold whitespace-nowrap">
+              {companyState.day}일차
+            </span>
+            <form action={logout}>
+              <button
+                type="submit"
+                aria-label="로그아웃"
+                title="로그아웃"
+                className="grid size-7 place-items-center rounded-full bg-white/20 text-primary-foreground transition-colors hover:bg-white/30"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <path d="M16 17l5-5-5-5" />
+                  <path d="M21 12H9" />
+                </svg>
+              </button>
+            </form>
           </span>
         </div>
         <div role="tablist" aria-label="시뮬레이터 탭" className="flex flex-wrap gap-2 p-2">
