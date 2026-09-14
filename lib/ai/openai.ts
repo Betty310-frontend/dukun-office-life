@@ -86,19 +86,32 @@ function characterProfileLine(p: WorkforceMember): string {
   ].join(', ')
 }
 
+export interface ConversationTurn {
+  speaker: string
+  text: string
+}
+
 export async function generateTalkChoices(
   npc: WorkforceMember,
   talker: WorkforceMember,
-  relation: RelationEntry
+  relation: RelationEntry,
+  history: ConversationTurn[] = []
 ): Promise<TalkChoice[] | null> {
   const system = '당신은 한국 광고대행사를 배경으로 한 회사생활 시뮬레이션 게임의 대화 생성기입니다. 반드시 JSON만 출력하세요.'
-  const user = `${talker.name}이(가) 동료 ${npc.name}에게 말을 걸려고 합니다.
+  const historyBlock = history.length
+    ? `\n최근 대화 내용(오래된 순):\n${history.map((h) => `${h.speaker}: ${h.text}`).join('\n')}\n`
+    : ''
+  const instruction = history.length
+    ? `위 대화 흐름을 자연스럽게 이어가는 ${talker.name}의 다음 발화를 정확히 3개 만들어주세요. 방금 상대가 한 말에 실제로 반응하는 내용이어야 하며, 대화 맥락과 동떨어진 화제로 갑자기 넘어가지 마세요.`
+    : `${talker.name}이(가) ${npc.name}에게 건넬 수 있는 대화 시작 문장을 정확히 3개 만들어주세요.`
 
-말을 거는 사람(${talker.name}) 정보: ${characterProfileLine(talker)}
+  const user = `${talker.name}이(가) 동료 ${npc.name}과(와) 메신저로 대화하고 있습니다.
+
+말하는 사람(${talker.name}) 정보: ${characterProfileLine(talker)}
 상대방(${npc.name}) 정보: ${characterProfileLine(npc)}
 현재 관계(${talker.name}→${npc.name}): ${relationLine(relation)}
-
-${talker.name}이(가) ${npc.name}에게 건넬 수 있는 대화 시작 문장을 정확히 3개 만들어주세요. 반드시 업무/관계/일상 카테고리(group)에서 각각 정확히 1개씩이어야 합니다.
+${historyBlock}
+${instruction} 반드시 업무/관계/일상 카테고리(group)에서 각각 정확히 1개씩이어야 합니다.
 - 업무: 실무 관련 대화
 - 관계: 칭찬/격려/사과/고민 나누기 등 감정적 교류
 - 일상: 점심/커피/취미 같은 사적인 가벼운 대화

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
-import { generateNpcReply, generateTalkChoices } from '@/lib/ai/openai'
+import { generateNpcReply, generateTalkChoices, type ConversationTurn } from '@/lib/ai/openai'
 import {
   fallbackTalkChoices,
   genericChoiceReply,
@@ -83,6 +83,39 @@ async function ensureConversation(
     return null
   }
   return data.id as string
+}
+
+const HISTORY_LIMIT = 6
+
+async function fetchRecentHistory(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  a: ActorRef,
+  b: ActorRef,
+  names: Record<string, string>
+): Promise<ConversationTurn[]> {
+  const [pa, pb] = canonicalPair(a, b)
+  const { data: conv } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('participant_a_type', pa.type)
+    .eq('participant_a_id', pa.id)
+    .eq('participant_b_type', pb.type)
+    .eq('participant_b_id', pb.id)
+    .maybeSingle()
+  if (!conv) return []
+
+  const { data: rows } = await supabase
+    .from('conversation_messages')
+    .select('sender_type, sender_id, text, created_at')
+    .eq('conversation_id', conv.id)
+    .order('created_at', { ascending: false })
+    .limit(HISTORY_LIMIT)
+  if (!rows) return []
+
+  return rows
+    .slice()
+    .reverse()
+    .map((r) => ({ speaker: names[`${r.sender_type}:${r.sender_id}`] ?? '알 수 없음', text: r.text }))
 }
 
 export async function startNpcTalkAction(
@@ -226,7 +259,11 @@ export async function generateProfileTalkChoicesAction(
   if (!me || !other) return { ok: false, message: '대상을 찾을 수 없습니다.' }
 
   const relation = await fetchRelation(supabase, meRef, otherRef)
-  const aiChoices = await generateTalkChoices(other, me, relation)
+  const history = await fetchRecentHistory(supabase, meRef, otherRef, {
+    [`profile:${me.id}`]: me.name,
+    [`profile:${other.id}`]: other.name,
+  })
+  const aiChoices = await generateTalkChoices(other, me, relation, history)
   const choices = aiChoices ?? fallbackTalkChoices(`profile:${otherProfileId}`, cs.date)
   return { ok: true, message: '', choices }
 }
