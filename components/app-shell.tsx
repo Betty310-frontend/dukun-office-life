@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { ProfileFormFields } from '@/components/profile-form-fields'
 import { SimPanel } from '@/components/sim-panel'
-import { LogsPanel } from '@/components/logs-panel'
+import { LogsPanel, type DailyEventRow } from '@/components/logs-panel'
 import { MessengerPanel } from '@/components/messenger-panel'
 import { TalkPanel } from '@/components/talk-panel'
 import { RelationshipsPanel } from '@/components/relationships-panel'
@@ -37,12 +37,14 @@ export function AppShell({
   profile,
   npcs,
   companyState,
+  dailyEvents,
   initialTab,
   error,
 }: {
   profile: Profile
   npcs: Npc[]
   companyState: CompanyState
+  dailyEvents: DailyEventRow[]
   initialTab: TabId
   error?: string
 }) {
@@ -99,7 +101,7 @@ export function AppShell({
         </Card>
       )}
 
-      {activeTab === 'logs' && <LogsPanel />}
+      {activeTab === 'logs' && <LogsPanel events={dailyEvents} />}
       {activeTab === 'messenger' && <MessengerPanel />}
       {activeTab === 'talk' && <TalkPanel people={npcs} />}
       {activeTab === 'relationships' && <RelationshipsPanel />}

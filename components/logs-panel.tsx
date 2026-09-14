@@ -1,47 +1,129 @@
+'use client'
+
+import { useMemo, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { ComingSoonBadge } from '@/components/coming-soon-badge'
+import { formatDate, seasonName, weekdayNameFromDate } from '@/lib/game/date'
+import type { LogCategory } from '@/lib/game/log-category'
 
-const CATEGORIES = ['전체', '업무', '업무외 이벤트', '출퇴근·점심·퇴근후', '주말·공휴일', '계절·기념일 이벤트', '즐겨찾기']
+export interface DailyEventRow {
+  id: string
+  date: string
+  text: string
+  category: LogCategory | null
+  is_protagonist: boolean
+}
 
-export function LogsPanel() {
+const CATEGORY_FILTERS: { id: 'all' | LogCategory; label: string }[] = [
+  { id: 'all', label: '전체' },
+  { id: 'work', label: '업무' },
+  { id: 'offwork', label: '업무외 이벤트' },
+  { id: 'commute', label: '출퇴근·점심·퇴근후' },
+  { id: 'weekend', label: '주말·공휴일' },
+  { id: 'season', label: '계절·기념일 이벤트' },
+]
+
+// 원본 legacy-reference/원본_V31.html 5351-5353행(logCategoryLabel) 그대로 포팅.
+const CATEGORY_TAG_LABEL: Record<LogCategory, string> = {
+  work: '업무',
+  offwork: '업무외',
+  commute: '생활시간',
+  weekend: '주말·공휴일',
+  season: '계절·기념일',
+}
+
+function cleanLogText(text: string, isProtagonist: boolean): string {
+  return isProtagonist ? text.replace(/^\[주인공[^\]]*\]\s*/, '') : text
+}
+
+export function LogsPanel({ events }: { events: DailyEventRow[] }) {
+  const [category, setCategory] = useState<'all' | LogCategory>('all')
+
+  const days = useMemo(() => {
+    const byDate = new Map<string, DailyEventRow[]>()
+    for (const ev of events) {
+      if (category !== 'all' && ev.category !== category) continue
+      const bucket = byDate.get(ev.date)
+      if (bucket) bucket.push(ev)
+      else byDate.set(ev.date, [ev])
+    }
+    return Array.from(byDate.entries()).sort((a, b) => b[0].localeCompare(a[0]))
+  }, [events, category])
+
+  const emptyLabel = CATEGORY_FILTERS.find((f) => f.id === category)?.label ?? '전체'
+
   return (
     <Card>
       <CardContent>
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div>
-            <h2 className="text-lg font-bold">📚 일일 로그</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              시뮬레이션 진행 중 발생한 하루 단위 이벤트를 날짜별로 조회합니다.
-            </p>
-          </div>
-          <ComingSoonBadge />
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-end gap-3">
-          <div className="grid gap-2">
-            <label className="text-xs text-muted-foreground">날짜 필터</label>
-            <Input type="date" disabled className="w-auto" />
-          </div>
-          <Button type="button" variant="secondary" disabled>전체 날짜 보기</Button>
-        </div>
+        <h2 className="text-lg font-bold">📚 일일 로그</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          시뮬레이션 진행 중 발생한 하루 단위 이벤트를 날짜별로 조회합니다.
+        </p>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          {CATEGORIES.map((cat) => (
+          {CATEGORY_FILTERS.map((f) => (
             <button
-              key={cat}
+              key={f.id}
               type="button"
-              disabled
-              className="cursor-not-allowed rounded-full border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground opacity-60"
+              aria-pressed={category === f.id}
+              onClick={() => setCategory(f.id)}
+              className={`rounded-full border px-3 py-1.5 text-xs font-bold transition-colors ${
+                category === f.id
+                  ? 'border-transparent bg-[image:linear-gradient(135deg,var(--primary),color-mix(in_oklch,var(--primary),black_12%))] text-primary-foreground'
+                  : 'border-border bg-background text-muted-foreground hover:bg-accent'
+              }`}
             >
-              {cat}
+              {f.label}
             </button>
           ))}
         </div>
 
-        <div className="mt-4 rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
-          아직 &lsquo;하루 진행&rsquo; 기능이 없어서 쌓인 로그가 없어요. 곧 이 자리에서 매일의 회사 이야기를 볼 수 있어요.
+        <div className="mt-4 grid gap-3">
+          {days.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-[#e5d5dc] bg-[#fffafb] p-10 text-center text-sm font-bold text-[#a18490]">
+              [{emptyLabel} · 데이터 없음]
+            </div>
+          )}
+          {days.map(([date, dayEvents]) => (
+            <div
+              key={date}
+              className="rounded-2xl border border-[#eadde3] bg-card p-4 shadow-[0_2px_8px_rgba(50,30,40,.035)]"
+            >
+              <h4 className="mb-3 border-b border-[#f0e7eb] pb-2.5 text-[15px] font-semibold">
+                {formatDate(date)} · {weekdayNameFromDate(date)} · {seasonName(date)}
+              </h4>
+              <div className="grid gap-2">
+                {dayEvents.map((ev, i) => (
+                  <div
+                    key={ev.id}
+                    className={`rounded-xl border p-3 text-sm leading-relaxed ${
+                      ev.is_protagonist
+                        ? 'border-[#efc4d4] bg-[linear-gradient(180deg,#fffafd_0%,#fff6fa_100%)]'
+                        : 'border-[#f0e8ec] bg-[#fbf9fa]'
+                    }`}
+                  >
+                    <div className="mb-1.5 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <span className="inline-flex items-center rounded-full border border-[#e7d8df] bg-white px-2 py-0.5 text-[11px] font-extrabold text-[#7b5968]">
+                          {CATEGORY_TAG_LABEL[ev.category ?? 'offwork']}
+                        </span>
+                        {ev.is_protagonist && (
+                          <span className="inline-flex items-center rounded-full border border-[#efc3d3] bg-[#fff0f6] px-2 py-0.5 text-[9px] font-black text-[#a45775]">
+                            주인공
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[10px] tracking-wide text-[#b59ca7] tabular-nums">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+                    <p className="whitespace-pre-wrap break-words text-[#332c2f]">
+                      {cleanLogText(ev.text, ev.is_protagonist) || '[내용 없음]'}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

@@ -30,12 +30,18 @@ export default async function HomePage({
     .select('*')
     .eq('id', 1)
     .single()
+  const { data: dailyEvents } = await supabase
+    .from('daily_events')
+    .select('id, date, text, category, is_protagonist')
+    .order('date', { ascending: false })
+    .order('created_at', { ascending: true })
 
   return (
     <AppShell
       profile={profile}
       npcs={npcs ?? []}
       companyState={companyState}
+      dailyEvents={dailyEvents ?? []}
       initialTab={initialTab}
       error={error}
     />
