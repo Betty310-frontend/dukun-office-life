@@ -16,32 +16,32 @@ Task 11 → 12 → 13 순서(작은 것부터)로 각각 독립적으로 구현�
 
 ---
 
-## Task 11: 인간관계 브라우징 UI
+## Task 11: 인간관계 브라우징 UI ✅ (커밋 `7095f5b`)
 
 **Files:**
 - Modify: `lib/game/relations.ts`, `app/page.tsx`, `components/relationships-panel.tsx`, `components/app-shell.tsx`
 
-- [ ] **Step 1: `relationLabel`/`relationshipOverallScore` 포팅**
+- [x] **Step 1: `relationLabel`/`relationshipOverallScore` 포팅**
 
 `lib/game/relations.ts`에 추가:
 - `relationLabel(r: RelationEntry): string` — 원본 1860행 `relationLabel` verbatim (conflict≥70→'갈등 심함', trust≥75&&affection≥70→'매우 가까움', trust≥65→'신뢰함', affection≥65→'호감', conflict≥45→'불편함', else '보통').
 - `relationshipOverallScore(map, a, b): number` — 원본 `renderRelations()`의 `Math.round(((relationshipScore(a,b)+relationshipScore(b,a))/2+.5)/1.5*100)`.
 
-- [ ] **Step 2: 서버에서 workforce + relationships 조회**
+- [x] **Step 2: 서버에서 workforce + relationships 조회**
 
 `app/page.tsx`: `profiles`를 `id,name`뿐 아니라 관계 계산에 필요한 전체 컬럼으로 조회(`toWorkforceMember`로 정규화), `relationships` 전체 행 조회. `RelationsMap`은 Map으로 직접 넘기지 않고 원시 행 배열로 넘겨 클라이언트에서 재구성(advance-day.ts의 relKey 패턴).
 
-- [ ] **Step 3: `RelationshipsPanel` 컴포넌트**
+- [x] **Step 3: `RelationshipsPanel` 컴포넌트**
 
 `renderRelations()`(검색, i<j 미정렬 쌍, 이성일 때만 이성 관심/선호 일치 표시, 빈 상태 문구 verbatim)를 포팅하고, 정렬(`affection|trust|conflict|romantic|overall`, desc)을 새로 추가. `overall`은 `relationshipOverallScore` 사용 (죽은 코드의 `affection*.4+trust*.45-conflict*.35` 공식은 쓰지 않음 — 실제 노출된 적 없는 값).
 
-- [ ] **Step 4: `app-shell.tsx` 배선**
+- [x] **Step 4: `app-shell.tsx` 배선**
 
-- [ ] **Step 5: 브라우저로 확인**
+- [x] **Step 5: 브라우저로 확인**
 
 검색 필터링, 정렬 각 키, 이성 페어에서만 이성 관심/선호 일치 표시되는지 확인.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ---
 
