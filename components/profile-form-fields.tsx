@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/submit-button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -139,7 +139,7 @@ export function ProfileFormFields({
         </div>
 
         {error && <p className="col-span-full text-sm text-destructive">{decodeURIComponent(error)}</p>}
-        <Button type="submit" className="col-span-full">{submitLabel}</Button>
+        <SubmitButton pendingLabel="저장하는 중..." className="col-span-full">{submitLabel}</SubmitButton>
       </div>
     </form>
   )

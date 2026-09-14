@@ -71,6 +71,7 @@ export function SimPanel({
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const [pendingAction, setPendingAction] = useState<null | 'advance' | 'sales' | 'overtime' | 'assign'>(null)
   const [resultMessage, setResultMessage] = useState<string | null>(null)
   const [resultOk, setResultOk] = useState(true)
 
@@ -83,8 +84,10 @@ export function SimPanel({
   )
 
   function handleAdvanceDay() {
+    setPendingAction('advance')
     startTransition(async () => {
       const result = await advanceDayAction()
+      setPendingAction(null)
       setResultMessage(result.message)
       setResultOk(result.ok)
       if (result.ok) router.refresh()
@@ -93,22 +96,28 @@ export function SimPanel({
 
   function handleAssign(role: 'lead' | 'seller' | 'fire', value: string) {
     const [type, id] = value.split(':') as [ActorType, string]
+    setPendingAction('assign')
     startTransition(async () => {
       await assignRole(role, type, id)
+      setPendingAction(null)
       router.refresh()
     })
   }
 
   function handleSalesMode(value: string) {
+    setPendingAction('sales')
     startTransition(async () => {
       await setSalesMode(value as SalesMode)
+      setPendingAction(null)
       router.refresh()
     })
   }
 
   function handleOvertimeMode(value: string) {
+    setPendingAction('overtime')
     startTransition(async () => {
       await setOvertimeMode(value as OvertimeMode)
+      setPendingAction(null)
       router.refresh()
     })
   }
@@ -200,7 +209,12 @@ export function SimPanel({
 
         <Card>
           <CardContent>
-            <h2 className="text-base font-bold">🎯 운영 전략</h2>
+            <h2 className="flex items-center gap-1.5 text-base font-bold">
+              🎯 운영 전략
+              {(pendingAction === 'sales' || pendingAction === 'overtime') && (
+                <span className="inline-block size-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              )}
+            </h2>
             <div className="mt-4 grid gap-3">
               <div className="grid gap-1.5">
                 <label className="text-xs text-muted-foreground">수주 강도</label>
@@ -244,7 +258,14 @@ export function SimPanel({
           onClick={handleAdvanceDay}
           className="h-auto w-full py-3.5 text-base font-extrabold"
         >
-          🎲 하루 진행
+          {pendingAction === 'advance' ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="inline-block size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              진행하는 중...
+            </span>
+          ) : (
+            '🎲 하루 진행'
+          )}
         </Button>
       </section>
 
@@ -329,7 +350,12 @@ export function SimPanel({
       <section className="grid gap-4 sm:grid-cols-2">
         <Card>
           <CardContent>
-            <h3 className="text-base font-bold">🗂️ 업무 배정</h3>
+            <h3 className="flex items-center gap-1.5 text-base font-bold">
+              🗂️ 업무 배정
+              {pendingAction === 'assign' && (
+                <span className="inline-block size-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              )}
+            </h3>
             <div className="mt-4 grid gap-3">
               {ASSIGNMENTS.map(({ role, label, typeKey, idKey }) => {
                 const currentType = companyState[typeKey]

@@ -46,7 +46,14 @@ export function ResetDataPanel() {
                 취소
               </Button>
               <Button type="button" variant="destructive" disabled={isPending} onClick={handleReset}>
-                초기화하기
+                {isPending ? (
+                  <span className="flex items-center gap-1.5">
+                    <span className="inline-block size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    초기화하는 중...
+                  </span>
+                ) : (
+                  '초기화하기'
+                )}
               </Button>
             </div>
           </div>

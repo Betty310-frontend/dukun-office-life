@@ -160,7 +160,14 @@ export function MessengerPanel({
               </select>
             </div>
             <Button type="button" disabled={isPending || !canChat} onClick={handleManualChat}>
-              랜덤 상황 대화 만들기
+              {isPending ? (
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  만드는 중...
+                </span>
+              ) : (
+                '랜덤 상황 대화 만들기'
+              )}
             </Button>
           </div>
           <p className="mt-2 text-xs text-muted-foreground">

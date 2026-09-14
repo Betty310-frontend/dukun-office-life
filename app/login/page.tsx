@@ -1,5 +1,5 @@
 import { login } from './actions'
-import { Button } from '@/components/ui/button'
+import { SubmitButton } from '@/components/submit-button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -33,7 +33,7 @@ export default async function LoginPage({
               <Input id="password" name="password" type="password" required />
             </div>
             {error && <p className="text-sm text-destructive">{decodeURIComponent(error)}</p>}
-            <Button type="submit" className="w-full">로그인</Button>
+            <SubmitButton pendingLabel="로그인하는 중..." className="w-full">로그인</SubmitButton>
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
             계정이 없으신가요? <Link href="/signup" className="font-semibold text-primary underline-offset-4 hover:underline">회원가입</Link>

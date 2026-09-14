@@ -88,13 +88,16 @@ function TraitPicker({ name, label, defaultChecked }: { name: string; label: str
 export function NpcEditor({ npc }: { npc: NpcData }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const [pendingAction, setPendingAction] = useState<'save' | 'toggle' | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [toast, setToast] = useState<string | null>(null)
   const detailsRef = useRef<HTMLDetailsElement>(null)
 
   function handleSave(formData: FormData) {
+    setPendingAction('save')
     startTransition(async () => {
       const result = await updateNpcAction(npc.id, formData)
+      setPendingAction(null)
       if (!result.ok) {
         setErrorMessage(result.message)
         return
@@ -107,8 +110,10 @@ export function NpcEditor({ npc }: { npc: NpcData }) {
   }
 
   function handleToggleActive() {
+    setPendingAction('toggle')
     startTransition(async () => {
       const result = await toggleNpcActiveAction(npc.id)
+      setPendingAction(null)
       if (!result.ok) {
         setErrorMessage(result.message)
         return
@@ -167,10 +172,26 @@ export function NpcEditor({ npc }: { npc: NpcData }) {
 
           <div className="flex gap-2">
             <Button type="submit" size="sm" disabled={isPending} className="flex-1">
-              저장
+              {pendingAction === 'save' ? (
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  저장하는 중...
+                </span>
+              ) : (
+                '저장'
+              )}
             </Button>
             <Button type="button" size="sm" variant="destructive" disabled={isPending} onClick={handleToggleActive}>
-              {npc.active ? '퇴사 처리' : '퇴사 취소'}
+              {pendingAction === 'toggle' ? (
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  처리하는 중...
+                </span>
+              ) : npc.active ? (
+                '퇴사 처리'
+              ) : (
+                '퇴사 취소'
+              )}
             </Button>
           </div>
         </form>
