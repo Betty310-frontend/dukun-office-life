@@ -100,6 +100,29 @@ export function TalkPanel({
 
   const myRelationTo = (person: Person) => relationByKey.get(`profile:${me.id}>${person.type}:${person.id}`)
 
+  const latestMessageByConversationId = useMemo(() => {
+    const map = new Map<string, ConversationMessageRow>()
+    for (const m of conversationMessages) {
+      const prev = map.get(m.conversation_id)
+      if (!prev || m.created_at > prev.created_at) map.set(m.conversation_id, m)
+    }
+    return map
+  }, [conversationMessages])
+
+  // 읽음 상태를 별도로 저장하지 않으므로, "마지막 메시지를 상대가 보냈고 아직 내가 답하지 않음"을
+  // 새 메시지 신호로 대신 쓴다 — 스키마 변경 없이 얻을 수 있는 가장 간단한 근사치다.
+  function hasUnreadFrom(person: Person) {
+    if (person.type !== 'profile') return false
+    const [pa, pb] = [`profile:${me.id}`, `profile:${person.id}`].sort()
+    const conv = conversations.find(
+      (c) => `${c.participant_a_type}:${c.participant_a_id}` === pa && `${c.participant_b_type}:${c.participant_b_id}` === pb
+    )
+    if (!conv) return false
+    const last = latestMessageByConversationId.get(conv.id)
+    if (!last) return false
+    return !(last.sender_type === 'profile' && last.sender_id === me.id)
+  }
+
   const memoriesFor = (person: Person) =>
     talkMemories.filter((m) => m.actor_type === 'profile' && m.actor_id === me.id && m.target_type === person.type && m.target_id === person.id).slice(0, 5)
 
@@ -130,6 +153,7 @@ export function TalkPanel({
                   {filteredPeople.map((p) => {
                     const rel = p.type === 'npc' ? myRelationTo(p) : undefined
                     const done = p.type === 'npc' && rel?.last_talked_date === companyDate
+                    const unread = hasUnreadFrom(p)
                     const active = selectedKey === `${p.type}:${p.id}`
                     const initial = p.name.trim().charAt(0) || '?'
                     return (
@@ -153,6 +177,11 @@ export function TalkPanel({
                         {done && (
                           <span className="shrink-0 rounded-full border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">
                             완료
+                          </span>
+                        )}
+                        {unread && (
+                          <span className="shrink-0 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
+                            새 메시지
                           </span>
                         )}
                       </button>
