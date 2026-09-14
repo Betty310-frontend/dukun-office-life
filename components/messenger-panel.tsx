@@ -174,25 +174,32 @@ export function MessengerPanel({
         <div className="mt-4 grid gap-3 sm:grid-cols-[240px_1fr]">
           <div className="grid gap-2 content-start">
             <p className="text-xs font-semibold text-muted-foreground">대화 기록</p>
-            {days.length === 0 && (
+            {days.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
                 아직 대화가 없어요
               </div>
+            ) : (
+              <div className="max-h-[420px] overflow-y-auto rounded-xl border border-border">
+                <div className="divide-y divide-border">
+                  {days.map(([date, scenes]) => {
+                    const active = date === activeDate
+                    return (
+                      <button
+                        key={date}
+                        type="button"
+                        onClick={() => setSelectedDate(date)}
+                        className={`flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-sm transition-colors ${
+                          active ? 'bg-primary/10 font-semibold text-foreground' : 'text-muted-foreground hover:bg-accent'
+                        }`}
+                      >
+                        <span className="truncate">{formatDate(date)}</span>
+                        <span className="shrink-0 text-[11px] text-muted-foreground">{scenes.length}개 대화</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
             )}
-            {days.map(([date, scenes]) => (
-              <button
-                key={date}
-                type="button"
-                onClick={() => setSelectedDate(date)}
-                className={`rounded-xl border px-3 py-2.5 text-left text-sm transition-colors ${
-                  date === activeDate
-                    ? 'border-primary bg-primary/10 font-semibold text-foreground'
-                    : 'border-border bg-background text-muted-foreground hover:bg-accent'
-                }`}
-              >
-                {formatDate(date)} · {scenes.length}개 대화
-              </button>
-            ))}
           </div>
 
           <div className="overflow-hidden rounded-xl border border-border">
