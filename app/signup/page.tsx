@@ -3,6 +3,7 @@ import { SubmitButton } from '@/components/submit-button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { RedirectIfAuthenticated } from '@/components/redirect-if-authenticated'
 import Link from 'next/link'
 
 export default async function SignupPage({
@@ -14,6 +15,7 @@ export default async function SignupPage({
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 p-4">
+      <RedirectIfAuthenticated />
       <div className="text-center">
         <p className="text-xs font-bold tracking-[0.18em] text-[#c46f91]">DDGEUN OFFICE LIFE</p>
         <h1 className="mt-1 text-2xl font-extrabold">🌸 두근두근 회사생활</h1>
