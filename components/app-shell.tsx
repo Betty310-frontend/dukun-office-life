@@ -82,7 +82,13 @@ export function AppShell({
   }
 
   return (
-    <div className="mx-auto flex h-dvh max-w-3xl flex-col p-4 sm:p-6">
+    <div
+      className="mx-auto flex h-dvh max-w-3xl flex-col
+        pt-[max(1rem,env(safe-area-inset-top))] sm:pt-[max(1.5rem,env(safe-area-inset-top))]
+        pr-[max(1rem,env(safe-area-inset-right))] sm:pr-[max(1.5rem,env(safe-area-inset-right))]
+        pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-[max(1.5rem,env(safe-area-inset-bottom))]
+        pl-[max(1rem,env(safe-area-inset-left))] sm:pl-[max(1.5rem,env(safe-area-inset-left))]"
+    >
       <div className="mb-4 shrink-0 overflow-hidden rounded-2xl border border-border bg-card">
         <div
           className="flex items-center justify-between gap-2 px-3 py-2 text-primary-foreground"

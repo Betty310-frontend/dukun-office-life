@@ -222,7 +222,7 @@ export function SimPanel({
                   value={companyState.sales_mode}
                   disabled={isPending}
                   onChange={(e) => handleSalesMode(e.target.value)}
-                  className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                  className="h-10 rounded-md border border-input bg-background px-3 text-sm"
                 >
                   {SALES_MODES.map((m) => (
                     <option key={m.value} value={m.value}>
@@ -237,7 +237,7 @@ export function SimPanel({
                   value={companyState.overtime_mode}
                   disabled={isPending}
                   onChange={(e) => handleOvertimeMode(e.target.value)}
-                  className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                  className="h-10 rounded-md border border-input bg-background px-3 text-sm"
                 >
                   {OVERTIME_MODES.map((m) => (
                     <option key={m.value} value={m.value}>
@@ -368,7 +368,7 @@ export function SimPanel({
                       value={value}
                       disabled={isPending}
                       onChange={(e) => handleAssign(role, e.target.value)}
-                      className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                      className="h-10 rounded-md border border-input bg-background px-3 text-sm"
                     >
                       <option value="" disabled>
                         담당자를 선택하세요

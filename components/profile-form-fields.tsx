@@ -32,7 +32,7 @@ function SelectField({
         id={id}
         name={name}
         defaultValue={defaultValue}
-        className="border-input h-9 w-full rounded-md border bg-background px-3 text-sm"
+        className="border-input h-10 w-full rounded-md border bg-background px-3 text-sm"
       >
         {options.map((option) => (
           <option key={option} value={option}>{option}</option>

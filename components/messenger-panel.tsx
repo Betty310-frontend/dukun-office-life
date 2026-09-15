@@ -127,7 +127,7 @@ export function MessengerPanel({
                 value={personA}
                 disabled={isPending}
                 onChange={(e) => setPersonA(e.target.value)}
-                className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                className="h-10 rounded-md border border-input bg-background px-3 text-sm"
               >
                 {peopleByTeam.map(({ team, people }) => (
                   <optgroup key={team} label={team}>
@@ -146,7 +146,7 @@ export function MessengerPanel({
                 value={personB}
                 disabled={isPending}
                 onChange={(e) => setPersonB(e.target.value)}
-                className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                className="h-10 rounded-md border border-input bg-background px-3 text-sm"
               >
                 {peopleByTeam.map(({ team, people }) => (
                   <optgroup key={team} label={team}>

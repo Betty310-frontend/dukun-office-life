@@ -143,7 +143,7 @@ export function RelationshipsPanel({
           <select
             value={sortKey}
             onChange={(e) => handleSortChange(e.target.value as SortKey)}
-            className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+            className="h-10 rounded-md border border-input bg-background px-3 text-sm"
           >
             {SORT_OPTIONS.map((opt) => (
               <option key={opt.id} value={opt.id}>

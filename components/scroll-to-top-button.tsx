@@ -41,7 +41,7 @@ export function ScrollToTopButton({ scrollRef }: { scrollRef: RefObject<HTMLElem
       type="button"
       aria-label="맨 위로 이동"
       onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}
-      className="fixed right-3 bottom-3 z-40 grid size-11 place-items-center rounded-full border border-border bg-card shadow-lg shadow-black/10 transition-transform hover:scale-105 sm:right-5 sm:bottom-5"
+      className="fixed right-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 grid size-11 place-items-center rounded-full border border-border bg-card shadow-lg shadow-black/10 transition-transform hover:scale-105 sm:right-5 sm:bottom-5"
     >
       <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} className="absolute inset-0 -rotate-90">
         <circle cx={SIZE / 2} cy={SIZE / 2} r={RADIUS} fill="none" stroke="var(--border)" strokeWidth={STROKE} />

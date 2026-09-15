@@ -84,7 +84,7 @@ export function LogsPanel({ events }: { events: DailyEventRow[] }) {
                 아이콘·텍스트 없이 아주 작게 렌더링돼 뭘 누르는 영역인지 알아보기 어렵다. 그래서
                 브라우저 렌더링에 기대지 않고 테두리·배경·달력 아이콘을 우리가 직접 그린 박스 안에
                 네이티브 인풋을 투명하게 겹쳐서, 어떤 브라우저에서도 항상 같은 크기/모양으로 보이게 한다. */}
-            <div className="relative flex h-9 w-full items-center gap-2 rounded-lg border border-input bg-background px-3 sm:w-auto">
+            <div className="relative flex h-10 w-full items-center gap-2 rounded-lg border border-input bg-background px-3 sm:w-auto">
               <span aria-hidden className="shrink-0 text-sm">📅</span>
               <span className="pointer-events-none text-sm text-foreground">
                 {dateFilter ? formatDate(dateFilter) : '날짜 선택'}
