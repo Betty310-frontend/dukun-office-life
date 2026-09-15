@@ -41,7 +41,8 @@ export async function saveProfile(formData: FormData) {
     .upsert({ id: user.id, ...parsed.data, is_configured: true })
 
   if (error) {
-    redirect(`${redirectTo}${errorSeparator}error=${encodeURIComponent(error.message)}`)
+    console.error('[saveProfile] upsert failed:', error.message)
+    redirect(`${redirectTo}${errorSeparator}error=${encodeURIComponent('저장에 실패했어요. 잠시 후 다시 시도해주세요.')}`)
   }
 
   redirect(successTo)

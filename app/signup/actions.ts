@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { translateAuthError } from '@/lib/auth/error-messages'
 
 export async function signup(formData: FormData) {
   const supabase = await createClient()
@@ -12,7 +13,7 @@ export async function signup(formData: FormData) {
   const { error } = await supabase.auth.signUp({ email, password })
 
   if (error) {
-    redirect(`/signup?error=${encodeURIComponent(error.message)}`)
+    redirect(`/signup?error=${encodeURIComponent(translateAuthError(error.message))}`)
   }
 
   redirect('/login')
