@@ -8,7 +8,7 @@ import { RosterCard } from '@/components/roster-card'
 import { NpcEditor } from '@/components/npc-editor'
 import { DailyFortuneCard } from '@/components/daily-fortune-card'
 import { advanceDayAction } from '@/app/actions/advance-day'
-import { assignRole, setOvertimeMode, setSalesMode } from '@/app/actions/company-state'
+import { assignRoles, setOvertimeMode, setSalesMode } from '@/app/actions/company-state'
 import { fmt } from '@/lib/game/format'
 import type { CompanyState } from '@/components/app-shell'
 import type { ActorType } from '@/lib/game/relations'
@@ -75,6 +75,22 @@ export function SimPanel({
   const [resultMessage, setResultMessage] = useState<string | null>(null)
   const [resultOk, setResultOk] = useState(true)
 
+  function assignmentValue(role: 'lead' | 'seller' | 'fire') {
+    const { typeKey, idKey } = ASSIGNMENTS.find((a) => a.role === role)!
+    const type = companyState[typeKey]
+    const id = companyState[idKey]
+    return type && id ? `${type}:${id}` : ''
+  }
+
+  const [assignDrafts, setAssignDrafts] = useState<Record<'lead' | 'seller' | 'fire', string>>(() => ({
+    lead: assignmentValue('lead'),
+    seller: assignmentValue('seller'),
+    fire: assignmentValue('fire'),
+  }))
+  const assignDirty = (['lead', 'seller', 'fire'] as const).some((role) => assignDrafts[role] !== assignmentValue(role))
+  const [assignMessage, setAssignMessage] = useState<string | null>(null)
+  const [assignOk, setAssignOk] = useState(true)
+
   const allPeople: Person[] = [
     { type: 'profile', id: me.id, name: `${me.name} (나)`, role: me.role, rank: me.rank, team: me.team, traits: me.traits },
     ...roster.map((npc) => ({ type: 'npc' as const, id: String(npc.id), name: npc.name, role: npc.role, rank: npc.rank, team: npc.team, traits: npc.traits })),
@@ -93,12 +109,24 @@ export function SimPanel({
     })
   }
 
-  function handleAssign(role: 'lead' | 'seller' | 'fire', value: string) {
-    const [type, id] = value.split(':') as [ActorType, string]
+  function handleAssignDraftChange(role: 'lead' | 'seller' | 'fire', value: string) {
+    setAssignDrafts((prev) => ({ ...prev, [role]: value }))
+  }
+
+  function handleSaveAssignments() {
     setPendingAction('assign')
     startTransition(async () => {
-      await assignRole(role, type, id)
-      router.refresh()
+      const payload: Partial<Record<'lead' | 'seller' | 'fire', { type: ActorType; id: string }>> = {}
+      for (const role of ['lead', 'seller', 'fire'] as const) {
+        const value = assignDrafts[role]
+        if (!value) continue
+        const [type, id] = value.split(':') as [ActorType, string]
+        payload[role] = { type, id }
+      }
+      const result = await assignRoles(payload)
+      setAssignMessage(result.message)
+      setAssignOk(result.ok)
+      if (result.ok) router.refresh()
     })
   }
 
@@ -353,35 +381,43 @@ export function SimPanel({
               )}
             </h3>
             <div className="mt-4 grid gap-3">
-              {ASSIGNMENTS.map(({ role, label, typeKey, idKey }) => {
-                const currentType = companyState[typeKey]
-                const currentId = companyState[idKey]
-                const value = currentType && currentId ? `${currentType}:${currentId}` : ''
-                return (
-                  <div key={role} className="grid gap-1.5">
-                    <label className="text-xs text-muted-foreground">{label}</label>
-                    <select
-                      value={value}
-                      disabled={isPending}
-                      onChange={(e) => handleAssign(role, e.target.value)}
-                      className="h-10 rounded-md border border-input bg-background px-3 text-sm"
-                    >
-                      <option value="" disabled>
-                        담당자를 선택하세요
-                      </option>
-                      {peopleByTeam.map(({ team, people }) => (
-                        <optgroup key={team} label={team}>
-                          {people.map((p) => (
-                            <option key={`${p.type}:${p.id}`} value={`${p.type}:${p.id}`}>
-                              {p.name}
-                            </option>
-                          ))}
-                        </optgroup>
-                      ))}
-                    </select>
-                  </div>
-                )
-              })}
+              {ASSIGNMENTS.map(({ role, label }) => (
+                <div key={role} className="grid gap-1.5">
+                  <label className="text-xs text-muted-foreground">{label}</label>
+                  <select
+                    value={assignDrafts[role]}
+                    disabled={isPending}
+                    onChange={(e) => handleAssignDraftChange(role, e.target.value)}
+                    className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                  >
+                    <option value="" disabled>
+                      담당자를 선택하세요
+                    </option>
+                    {peopleByTeam.map(({ team, people }) => (
+                      <optgroup key={team} label={team}>
+                        {people.map((p) => (
+                          <option key={`${p.type}:${p.id}`} value={`${p.type}:${p.id}`}>
+                            {p.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </div>
+              ))}
+              <Button type="button" disabled={isPending || !assignDirty} onClick={handleSaveAssignments}>
+                {isPending && pendingAction === 'assign' ? (
+                  <span className="flex items-center gap-1.5">
+                    <span className="inline-block size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    저장하는 중...
+                  </span>
+                ) : (
+                  '담당자 저장'
+                )}
+              </Button>
+              {assignMessage && (
+                <p className={`text-xs font-semibold ${assignOk ? 'text-foreground' : 'text-destructive'}`}>{assignMessage}</p>
+              )}
             </div>
           </CardContent>
         </Card>

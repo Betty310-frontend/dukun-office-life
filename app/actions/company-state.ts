@@ -13,10 +13,8 @@ const ROLE_COLUMNS: Record<AssignmentRole, { type: string; id: string }> = {
   fire: { type: 'fire_actor_type', id: 'fire_actor_id' },
 }
 
-export async function assignRole(
-  role: AssignmentRole,
-  actorType: ActorType,
-  actorId: string
+export async function assignRoles(
+  assignments: Partial<Record<AssignmentRole, { type: ActorType; id: string }>>
 ): Promise<{ ok: boolean; message: string }> {
   const supabase = await createClient()
   const {
@@ -24,11 +22,17 @@ export async function assignRole(
   } = await supabase.auth.getUser()
   if (!user) return { ok: false, message: '로그인이 필요합니다.' }
 
-  const columns = ROLE_COLUMNS[role]
-  const { error } = await supabase
-    .from('company_state')
-    .update({ [columns.type]: actorType, [columns.id]: actorId })
-    .eq('id', 1)
+  const patch: Record<string, string> = {}
+  for (const role of Object.keys(assignments) as AssignmentRole[]) {
+    const actor = assignments[role]
+    if (!actor) continue
+    const columns = ROLE_COLUMNS[role]
+    patch[columns.type] = actor.type
+    patch[columns.id] = actor.id
+  }
+  if (Object.keys(patch).length === 0) return { ok: true, message: '변경된 담당자가 없어요.' }
+
+  const { error } = await supabase.from('company_state').update(patch).eq('id', 1)
   if (error) return { ok: false, message: '담당자 배정에 실패했습니다.' }
 
   revalidatePath('/')
