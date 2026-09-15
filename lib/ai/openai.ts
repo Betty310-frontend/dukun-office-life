@@ -28,7 +28,10 @@ const replyResponseSchema = z.object({ reply: z.string().min(1).max(300) })
 const fortuneResponseSchema = z.object({ fortune: z.string().min(1).max(150) })
 
 const MODEL = 'gpt-4o-mini'
-const TIMEOUT_MS = 12000
+// Vercel Hobby 플랜의 서버리스 함수 기본 실행 제한(10초)보다 여유 있게 짧아야 한다.
+// 이 값이 그 한도를 넘으면 우리 쪽 AbortController가 취소하기 전에 플랫폼이 함수를
+// 강제 종료해버려서, 의도한 null 폴백 대신 진짜 서버 에러(500)로 응답이 나간다.
+const TIMEOUT_MS = 8000
 
 async function callOpenAI(messages: { role: 'system' | 'user'; content: string }[]): Promise<unknown | null> {
   const apiKey = process.env.OPENAI_API_KEY
