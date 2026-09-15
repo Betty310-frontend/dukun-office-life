@@ -291,8 +291,11 @@ function ConversationThread({
   }, [conversationId, selected.type])
 
   const [choices, setChoices] = useState<TalkChoice[] | null>(null)
-  const [talkResult, setTalkResult] = useState<{
-    reply: string
+  // NPC의 답장 텍스트 자체는 메시지 스레드(messages)에 이미 저장·표시되므로 여기서는
+  // 다시 보여주지 않는다 — 예전에는 여기서 reply를 같이 들고 있다가 스레드와 별개로
+  // 한 번 더 렌더링해서, router.refresh()가 끝나기 전/후에 따라 "NPC 메시지만 보임"
+  // 또는 "같은 메시지가 스타일만 다르게 두 번 보임"으로 나타났다.
+  const [talkDelta, setTalkDelta] = useState<{
     delta: { affection: number; trust: number; conflict: number }
     memory: { text: string } | null
   } | null>(null)
@@ -322,7 +325,7 @@ function ConversationThread({
           setChoices(null)
           return
         }
-        setTalkResult({ reply: res.reply!, delta: res.delta!, memory: res.memory ?? null })
+        setTalkDelta({ delta: res.delta!, memory: res.memory ?? null })
         setChoices(null)
         router.refresh()
         return
@@ -397,21 +400,7 @@ function ConversationThread({
 
         {selected.type === 'npc' ? (
           <div className="grid gap-2 rounded-xl border border-border bg-accent/60 p-3">
-            {talkResult ? (
-              <div className="grid gap-2">
-                <div className="max-w-[82%] rounded-2xl rounded-tl-sm bg-[#f8f4f6] px-3 py-2 text-sm leading-relaxed">
-                  <span className="mb-0.5 block text-[11px] font-bold text-muted-foreground">{selected.name}</span>
-                  {talkResult.reply}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  호감 {talkResult.delta.affection >= 0 ? '+' : ''}
-                  {talkResult.delta.affection} · 신뢰 {talkResult.delta.trust >= 0 ? '+' : ''}
-                  {talkResult.delta.trust} · 갈등 {talkResult.delta.conflict >= 0 ? '+' : ''}
-                  {talkResult.delta.conflict}
-                  {talkResult.memory && <> · 💗 새로운 추억이 생겼어요</>}
-                </p>
-              </div>
-            ) : talkedToday ? (
+            {talkedToday ? (
               <p className="text-xs text-muted-foreground">
                 오늘 {selected.name}과(와)는 이미 대화했습니다. 직원 한 명당 하루에 한 번만 대화할 수 있습니다. 다음 날 다시 대화할 수 있습니다.
               </p>
@@ -447,6 +436,15 @@ function ConversationThread({
                   '대화 시작하기'
                 )}
               </Button>
+            )}
+            {talkDelta && (
+              <p className="text-xs text-muted-foreground">
+                호감 {talkDelta.delta.affection >= 0 ? '+' : ''}
+                {talkDelta.delta.affection} · 신뢰 {talkDelta.delta.trust >= 0 ? '+' : ''}
+                {talkDelta.delta.trust} · 갈등 {talkDelta.delta.conflict >= 0 ? '+' : ''}
+                {talkDelta.delta.conflict}
+                {talkDelta.memory && <> · 💗 새로운 추억이 생겼어요</>}
+              </p>
             )}
           </div>
         ) : (
