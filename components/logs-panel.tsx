@@ -76,7 +76,7 @@ export function LogsPanel({ events }: { events: DailyEventRow[] }) {
         </p>
 
         <div className="mt-4 flex flex-wrap items-end gap-3">
-          <div className="grid gap-1">
+          <div className="grid w-full gap-1 sm:w-auto">
             <label htmlFor="log-date-filter" className="text-xs text-muted-foreground">
               날짜 필터
             </label>
