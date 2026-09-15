@@ -1,15 +1,7 @@
-import { saveProfile } from './actions'
+import { OnboardingForm } from './onboarding-form'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ProfileFormFields } from '@/components/profile-form-fields'
-import { DEFAULT_PROFILE } from '@/lib/validation/profile'
 
-export default async function OnboardingPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>
-}) {
-  const { error } = await searchParams
-
+export default function OnboardingPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4 py-10">
       <Card className="w-full max-w-2xl">
@@ -20,12 +12,7 @@ export default async function OnboardingPage({
           </p>
         </CardHeader>
         <CardContent>
-          <ProfileFormFields
-            action={saveProfile}
-            profile={DEFAULT_PROFILE}
-            error={error}
-            submitLabel="저장하고 시작하기"
-          />
+          <OnboardingForm />
         </CardContent>
       </Card>
     </div>

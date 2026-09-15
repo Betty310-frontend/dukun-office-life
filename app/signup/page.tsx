@@ -1,18 +1,9 @@
-import { signup } from './actions'
-import { SubmitButton } from '@/components/submit-button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { SignupForm } from './signup-form'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RedirectIfAuthenticated } from '@/components/redirect-if-authenticated'
 import Link from 'next/link'
 
-export default async function SignupPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>
-}) {
-  const { error } = await searchParams
-
+export default function SignupPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 p-4">
       <RedirectIfAuthenticated />
@@ -25,18 +16,7 @@ export default async function SignupPage({
           <CardTitle>✨ 회원가입</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={signup} className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">이메일</Label>
-              <Input id="email" name="email" type="email" required />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">비밀번호</Label>
-              <Input id="password" name="password" type="password" required minLength={6} />
-            </div>
-            {error && <p className="text-sm text-destructive">{decodeURIComponent(error)}</p>}
-            <SubmitButton pendingLabel="가입하는 중..." className="w-full">회원가입</SubmitButton>
-          </form>
+          <SignupForm />
           <p className="mt-4 text-center text-sm text-muted-foreground">
             이미 계정이 있으신가요? <Link href="/login" className="font-semibold text-primary underline-offset-4 hover:underline">로그인</Link>
           </p>
