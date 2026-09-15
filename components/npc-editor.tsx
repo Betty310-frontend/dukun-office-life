@@ -97,8 +97,8 @@ export function NpcEditor({ npc }: { npc: NpcData }) {
     setPendingAction('save')
     startTransition(async () => {
       const result = await updateNpcAction(npc.id, formData)
-      setPendingAction(null)
       if (!result.ok) {
+        setPendingAction(null)
         setErrorMessage(result.message)
         return
       }
@@ -113,8 +113,8 @@ export function NpcEditor({ npc }: { npc: NpcData }) {
     setPendingAction('toggle')
     startTransition(async () => {
       const result = await toggleNpcActiveAction(npc.id)
-      setPendingAction(null)
       if (!result.ok) {
+        setPendingAction(null)
         setErrorMessage(result.message)
         return
       }
@@ -172,7 +172,7 @@ export function NpcEditor({ npc }: { npc: NpcData }) {
 
           <div className="flex gap-2">
             <Button type="submit" size="sm" disabled={isPending} className="flex-1">
-              {pendingAction === 'save' ? (
+              {isPending && pendingAction === 'save' ? (
                 <span className="flex items-center gap-1.5">
                   <span className="inline-block size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
                   저장하는 중...
@@ -182,7 +182,7 @@ export function NpcEditor({ npc }: { npc: NpcData }) {
               )}
             </Button>
             <Button type="button" size="sm" variant="destructive" disabled={isPending} onClick={handleToggleActive}>
-              {pendingAction === 'toggle' ? (
+              {isPending && pendingAction === 'toggle' ? (
                 <span className="flex items-center gap-1.5">
                   <span className="inline-block size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
                   처리하는 중...

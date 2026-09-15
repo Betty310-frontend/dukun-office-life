@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { useFormStatus } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { ProfileFormFields } from '@/components/profile-form-fields'
@@ -40,6 +41,31 @@ export interface CompanyState {
   fire_actor_type: string | null
   fire_actor_id: string | null
   last_manual_chat_day: number
+}
+
+function LogoutButton() {
+  const { pending } = useFormStatus()
+  return (
+    <button
+      type="submit"
+      aria-label="로그아웃"
+      title="로그아웃"
+      disabled={pending}
+      className="-m-2.5 grid size-11 place-items-center rounded-full text-primary-foreground disabled:cursor-not-allowed"
+    >
+      <span className="grid size-7 place-items-center rounded-full bg-white/20 transition-colors hover:bg-white/30">
+        {pending ? (
+          <span className="inline-block size-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <path d="M16 17l5-5-5-5" />
+            <path d="M21 12H9" />
+          </svg>
+        )}
+      </span>
+    </button>
+  )
 }
 
 export function AppShell({
@@ -102,18 +128,7 @@ export function AppShell({
               {companyState.day}일차
             </span>
             <form action={logout}>
-              <button
-                type="submit"
-                aria-label="로그아웃"
-                title="로그아웃"
-                className="grid size-7 place-items-center rounded-full bg-white/20 text-primary-foreground transition-colors hover:bg-white/30"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                  <path d="M16 17l5-5-5-5" />
-                  <path d="M21 12H9" />
-                </svg>
-              </button>
+              <LogoutButton />
             </form>
           </span>
         </div>

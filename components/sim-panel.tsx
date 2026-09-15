@@ -87,7 +87,6 @@ export function SimPanel({
     setPendingAction('advance')
     startTransition(async () => {
       const result = await advanceDayAction()
-      setPendingAction(null)
       setResultMessage(result.message)
       setResultOk(result.ok)
       if (result.ok) router.refresh()
@@ -99,7 +98,6 @@ export function SimPanel({
     setPendingAction('assign')
     startTransition(async () => {
       await assignRole(role, type, id)
-      setPendingAction(null)
       router.refresh()
     })
   }
@@ -108,7 +106,6 @@ export function SimPanel({
     setPendingAction('sales')
     startTransition(async () => {
       await setSalesMode(value as SalesMode)
-      setPendingAction(null)
       router.refresh()
     })
   }
@@ -117,7 +114,6 @@ export function SimPanel({
     setPendingAction('overtime')
     startTransition(async () => {
       await setOvertimeMode(value as OvertimeMode)
-      setPendingAction(null)
       router.refresh()
     })
   }
@@ -211,7 +207,7 @@ export function SimPanel({
           <CardContent>
             <h2 className="flex items-center gap-1.5 text-base font-bold">
               🎯 운영 전략
-              {(pendingAction === 'sales' || pendingAction === 'overtime') && (
+              {isPending && (pendingAction === 'sales' || pendingAction === 'overtime') && (
                 <span className="inline-block size-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               )}
             </h2>
@@ -258,7 +254,7 @@ export function SimPanel({
           onClick={handleAdvanceDay}
           className="h-auto w-full py-3.5 text-base font-extrabold"
         >
-          {pendingAction === 'advance' ? (
+          {isPending && pendingAction === 'advance' ? (
             <span className="flex items-center justify-center gap-2">
               <span className="inline-block size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
               진행하는 중...
@@ -352,7 +348,7 @@ export function SimPanel({
           <CardContent>
             <h3 className="flex items-center gap-1.5 text-base font-bold">
               🗂️ 업무 배정
-              {pendingAction === 'assign' && (
+              {isPending && pendingAction === 'assign' && (
                 <span className="inline-block size-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               )}
             </h3>
