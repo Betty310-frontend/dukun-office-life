@@ -1,9 +1,11 @@
 import { OnboardingForm } from './onboarding-form'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { RedirectIfUnauthenticated } from '@/components/redirect-if-unauthenticated'
 
 export default function OnboardingPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4 py-10">
+      <RedirectIfUnauthenticated />
       <Card className="w-full max-w-2xl">
         <CardHeader>
           <CardTitle>🌷 내정보</CardTitle>
